@@ -17,22 +17,22 @@ public class ClientTUI {
 		inputReader = new BufferedReader(new InputStreamReader(System.in));
 	}
 
-	public String[] getCommand() {
+	public String getCommand() {
 		printMenu();
 		boolean isNotCorrectInput = true;
 		System.out.println("Please enter a command.");
-		String[] commandSplit = null;
+		String command = null;
 		while (isNotCorrectInput) {
-			String command = readString();
-			commandSplit = command.split("\\s+");
-			if (commandSplit.length > 1 && commandList.contains(commandSplit[1])) {
+			command = readString();
+			String[] commandSplit = command.split("\\s+");
+			if (commandList.contains(commandSplit[0])) {
 				isNotCorrectInput = false;
 			} else {
 				System.out.println("Input not recognized, please try again: ");
 				System.out.println("Syntax: <filename> <command>");
 			}
 		}
-		return commandSplit;
+		return command;
 	}
 
 	public String readString() {

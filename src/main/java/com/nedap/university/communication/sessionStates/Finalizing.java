@@ -1,7 +1,5 @@
 package sessionStates;
 
-import java.net.DatagramPacket;
-
 public class Finalizing implements SessionState {
 
 	private Session session;
@@ -11,7 +9,7 @@ public class Finalizing implements SessionState {
 	}
 
 	@Override
-	public DatagramPacket composeDatagram() {
+	public byte[] composeDatagram(byte[] incomingDatagram) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -10,13 +10,11 @@ public class Session {
 
 	private SessionState downloading, uploading, finalizing, initializing;
 	private SessionState sessionState;
-	private String fileName;
 	private int port;
 	private DatagramSocket socket;
 
-	public Session(String inputFile, int servicePort, String command) {
-		statesSetup(command);
-		fileName = inputFile;
+	public Session(int servicePort) {
+		statesSetup();
 		port = servicePort;
 
 		sessionState = initializing;
@@ -26,16 +24,19 @@ public class Session {
 		sessionState = state;
 	}
 
-	public void initiateSession(InetAddress address) {
+	public void initiateSession(InetAddress address, byte[] inputData) {
 		try {
 			socket = new DatagramSocket();
 		} catch (SocketException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		byte[] datagram = sessionState.composeDatagram();
+		byte[] datagram = sessionState.composeDatagram(inputData);
 		DatagramPacket packet = new DatagramPacket(datagram, datagram.length, address, port);
 		sendDatagram(packet);
+	}
+
+	public void startSession() {
+
 	}
 
 	private void sendDatagram(DatagramPacket datagram) {
@@ -48,15 +49,11 @@ public class Session {
 		}
 	}
 
-	public String getFileName() {
-		return fileName;
-	}
-
-	private void statesSetup(String command) {
+	private void statesSetup() {
 		downloading = new Downloading(this);
 		uploading = new Uploading(this);
 		finalizing = new Finalizing(this);
-		initializing = new Initializing(this, command);
+		initializing = new Initializing(this);
 	}
 
 	public SessionState getDownloading() {

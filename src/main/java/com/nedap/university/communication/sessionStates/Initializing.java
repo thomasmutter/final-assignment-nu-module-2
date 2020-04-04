@@ -5,25 +5,17 @@ import header.HeaderConstructor;
 public class Initializing implements SessionState {
 
 	private Session session;
-	private String command;
+	private SetupManager setup;
+	private HeaderConstructor headerConstructor;
 
-	public Initializing(Session inputSession, String commandArg) {
+	public Initializing(Session inputSession) {
 		session = inputSession;
-		command = commandArg;
+		headerConstructor = new HeaderConstructor();
 	}
 
 	@Override
-	public byte[] composeDatagram() {
-		String dataString = session.getFileName() + "\n" + command;
-		byte[] header = new HeaderConstructor().constructHeader(0);
-		byte[] data = dataString.getBytes();
-		byte[] datagram = new byte[HeaderConstructor.HEADERLENGTH + data.length];
-
-		System.arraycopy(header, 0, datagram, 0, HeaderConstructor.HEADERLENGTH);
-		System.arraycopy(data, 0, datagram, HeaderConstructor.HEADERLENGTH, data.length);
-
-		session.setSessionState(parseStringToState(command));
-		return datagram;
+	public byte[] composeDatagram(byte[] incomingDatagram) {
+		return setup.composeData(incomingDatagram);
 	}
 
 	@Override
@@ -31,14 +23,8 @@ public class Initializing implements SessionState {
 
 	}
 
-	private SessionState parseStringToState(String command) {
-		if (command.contentEquals("dl")) {
-			return session.getDownloading();
-		} else if (command.contentEquals("ul")) {
-			return session.getUploading();
-		} else {
-			return session.getFinalizing();
-		}
+	public void setSetupManager(SetupManager setupArg) {
+		setup = setupArg;
 	}
 
 }
