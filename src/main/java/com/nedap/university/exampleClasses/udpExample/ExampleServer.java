@@ -62,6 +62,7 @@ public class ExampleServer {
 			int clientPort = request.getPort();
 
 			DatagramPacket response = new DatagramPacket(buffer, buffer.length, clientAddress, clientPort);
+			System.out.println("Sending quote...");
 			socket.send(response);
 		}
 	}
