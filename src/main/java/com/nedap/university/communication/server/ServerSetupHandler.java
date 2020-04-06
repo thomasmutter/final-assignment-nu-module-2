@@ -44,6 +44,10 @@ public class ServerSetupHandler implements SetupManager {
 		return datagram;
 	}
 
+	private byte[] newHeaderFromOldHeader(byte[] oldHeader) {
+
+	}
+
 	private byte[] reduceBufferToRelevantData(byte[] buffer) {
 		byte[] incomingHeader = headerParser.getHeader(buffer);
 		int dataSize = headerParser.getWindowSize(incomingHeader);
