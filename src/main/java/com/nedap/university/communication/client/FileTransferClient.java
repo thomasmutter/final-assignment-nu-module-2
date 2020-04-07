@@ -1,5 +1,6 @@
 package client;
 
+import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -30,6 +31,10 @@ public class FileTransferClient {
 		((Initializing) session.getInitializing()).setSetupManager(handler);
 		handler.setFlagsFromCommand(command.split("\\s+")[0]);
 		session.initiateSession(address, command.getBytes());
+	}
+
+	private DatagramPacket userInputToDatagram() {
+		return null;
 	}
 
 	public static void main(String[] args) {
