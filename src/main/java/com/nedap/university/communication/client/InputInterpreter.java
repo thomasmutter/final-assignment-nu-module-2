@@ -9,6 +9,7 @@ import managers.DownloadManager;
 import managers.PacketManager;
 import managers.ReadDataManager;
 import managers.UploadManager;
+import remaking.SessionV2;
 
 public class InputInterpreter {
 
@@ -38,14 +39,14 @@ public class InputInterpreter {
 		return datagram;
 	}
 
-	public PacketManager getPacketManagerFromInput() {
+	public PacketManager getPacketManagerFromInput(SessionV2 session) {
 		switch (getFlagsFromCommand(command.split("\\s+")[0])) {
 		case HeaderConstructor.UL:
-			return new UploadManager();
+			return new UploadManager(session);
 		case HeaderConstructor.DL:
-			return new DownloadManager();
+			return new DownloadManager(session);
 		default:
-			return new ReadDataManager();
+			return new ReadDataManager(session);
 		}
 	}
 

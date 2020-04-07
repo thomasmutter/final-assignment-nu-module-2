@@ -19,7 +19,7 @@ public class Server {
 		DatagramPacket request = receiveRequest();
 		System.out.println("Request received");
 		RequestHandler handler = new RequestHandler();
-		session.setManager(handler.getPacketManagerFromRequest(request.getData()));
+		session.setManager(handler.getPacketManagerFromRequest(request.getData(), session));
 		session.addToReadQueue(request);
 		session.startUp();
 	}

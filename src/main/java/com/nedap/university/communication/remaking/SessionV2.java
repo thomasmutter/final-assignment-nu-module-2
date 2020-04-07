@@ -51,7 +51,7 @@ public class SessionV2 {
 	}
 
 	public void finalizeSession() {
-
+		System.out.println("Finalization steps requested by packet manager");
 	}
 
 	private DatagramPacket readDatagram() {

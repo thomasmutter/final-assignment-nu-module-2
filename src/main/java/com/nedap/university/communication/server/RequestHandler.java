@@ -7,6 +7,7 @@ import managers.ListManager;
 import managers.PacketManager;
 import managers.RemoveManager;
 import managers.UploadManager;
+import remaking.SessionV2;
 
 public class RequestHandler {
 
@@ -16,16 +17,16 @@ public class RequestHandler {
 		parser = new HeaderParser();
 	}
 
-	public PacketManager getPacketManagerFromRequest(byte[] data) {
+	public PacketManager getPacketManagerFromRequest(byte[] data, SessionV2 session) {
 		switch (parser.getCommand(parser.getHeader(data))) {
 		case HeaderConstructor.UL:
-			return new DownloadManager();
+			return new DownloadManager(session);
 		case HeaderConstructor.DL:
-			return new UploadManager();
+			return new UploadManager(session);
 		case HeaderConstructor.RM:
-			return new RemoveManager();
+			return new RemoveManager(session);
 		default:
-			return new ListManager();
+			return new ListManager(session);
 		}
 	}
 }

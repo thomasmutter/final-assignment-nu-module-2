@@ -27,7 +27,7 @@ public class Client {
 
 		SessionV2 session = new SessionV2();
 		InputInterpreter input = new InputInterpreter(command);
-		session.setManager(input.getPacketManagerFromInput());
+		session.setManager(input.getPacketManagerFromInput(session));
 		session.addToSendQueue(input.getDatagramFromInput());
 		session.startUp();
 	}
