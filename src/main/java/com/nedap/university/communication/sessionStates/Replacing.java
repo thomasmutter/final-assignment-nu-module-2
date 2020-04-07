@@ -1,11 +1,9 @@
 package sessionStates;
 
-public class Finalizing implements SessionState {
+public class Replacing implements SessionState {
 
-	private Session session;
-
-	public Finalizing(Session inputSession) {
-		session = inputSession;
+	public Replacing(Session session) {
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override

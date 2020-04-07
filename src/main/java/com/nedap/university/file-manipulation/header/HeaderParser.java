@@ -50,9 +50,9 @@ public class HeaderParser {
 	public int getIntFromByteArray(int[] array) {
 		int intValue = 0;
 		for (int i = 0; i < array.length; i++) {
-			System.out.println("8bit: " + array[i]);
+			// System.out.println("8bit: " + array[i]);
 			int byteToInt = array[i] << 8 * (array.length - i - 1);
-			System.out.println(byteToInt);
+			// System.out.println(byteToInt);
 			intValue = intValue + byteToInt;
 		}
 		return intValue;

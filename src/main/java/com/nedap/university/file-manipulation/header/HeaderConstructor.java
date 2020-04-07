@@ -2,6 +2,23 @@ package header;
 
 public class HeaderConstructor {
 
+	/**
+	 * Session state commands
+	 */
+	public static final byte DL = 1;
+	public static final byte UL = 2;
+	public static final byte RM = 4;
+	public static final byte RP = 8;
+	public static final byte LS = 16;
+	public static final byte P = 32;
+	public static final byte R = 64;
+
+	/**
+	 * Communication commands
+	 */
+	public static final byte ACK = 1;
+	public static final byte FIN = 2;
+
 	public static final int HEADERLENGTH = 14;
 	private static final int NUMBERBYTES = 4;
 

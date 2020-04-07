@@ -20,4 +20,10 @@ public class Downloading implements SessionState {
 
 	}
 
+	@Override
+	public byte[] headerToSend(byte[] oldHeader) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -1,11 +1,12 @@
 package sessionStates;
 
-public class Finalizing implements SessionState {
+public class Removing implements SessionState {
 
 	private Session session;
+	private String fileName;
 
-	public Finalizing(Session inputSession) {
-		session = inputSession;
+	public Removing(Session session) {
+		this.session = session;
 	}
 
 	@Override
@@ -18,6 +19,10 @@ public class Finalizing implements SessionState {
 	public void handleData() {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void setFileName(String fileNameArg) {
+		fileName = fileNameArg;
 	}
 
 	@Override
