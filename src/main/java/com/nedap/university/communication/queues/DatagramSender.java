@@ -34,8 +34,8 @@ public class DatagramSender implements Runnable {
 				DatagramPacket packetToSend = queue.take();
 				socket.send(packetToSend);
 			} catch (IOException e) {
-				System.out.println("Failed to send packet");
-				e.printStackTrace();
+				System.out.println("Sender closed");
+				// e.printStackTrace();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -44,13 +44,11 @@ public class DatagramSender implements Runnable {
 	}
 
 	public DatagramPacket wrapPacketInUDP(byte[] packet) {
-		System.out.println(packet);
 		DatagramPacket datagram = new DatagramPacket(packet, packet.length, address, port);
 		return datagram;
 	}
 
 	public void addDatagramToQueue(DatagramPacket datagram) {
-		System.out.println("Adding packet to queue");
 		queue.offer(datagram);
 	}
 
@@ -60,8 +58,8 @@ public class DatagramSender implements Runnable {
 	}
 
 	public void close() {
-		queue.clear();
 		socket.close();
+		queue.offer(new DatagramPacket(new byte[1], 1));
 	}
 
 }

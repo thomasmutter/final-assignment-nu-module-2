@@ -22,6 +22,14 @@ public class ListManager implements PacketManager {
 
 	@Override
 	public void processIncomingData(byte[] data) {
+		if (parser.getStatus(parser.getHeader(data)) != HeaderConstructor.ACK) {
+			sendList(data);
+		} else {
+			session.finalizeSession();
+		}
+	}
+
+	private void sendList(byte[] data) {
 		byte[] header = headerToSend(parser.getHeader(data));
 		byte[] payload = getBytesFromPath();
 
@@ -30,8 +38,8 @@ public class ListManager implements PacketManager {
 		System.arraycopy(header, 0, datagram, 0, header.length);
 		System.arraycopy(payload, 0, datagram, header.length, payload.length);
 
+//		System.out.println("Offering list to send queue");
 		session.addToSendQueue(datagram);
-		session.finalizeSession();
 	}
 
 	private byte[] getBytesFromPath() {
@@ -48,11 +56,11 @@ public class ListManager implements PacketManager {
 		byte flags = HeaderConstructor.LS;
 		byte status = HeaderConstructor.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-		System.out.println("Sending packet with seqNo: " + seqNo);
+//		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = parser.getSequenceNumber(oldHeader) + parser.getWindowSize(oldHeader);
 		int checksum = 0;
 		int windowSize = oldHeader.length;
-		System.out.println("The payload size is: " + windowSize);
+//		System.out.println("The payload size is: " + windowSize);
 		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 

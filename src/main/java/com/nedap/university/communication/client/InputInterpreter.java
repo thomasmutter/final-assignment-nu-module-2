@@ -64,7 +64,6 @@ public class InputInterpreter {
 	}
 
 	private byte getFlagsFromCommand(String command) {
-		System.out.println(commandList.indexOf(command));
 		return (byte) (1 << commandList.indexOf(command));
 	}
 

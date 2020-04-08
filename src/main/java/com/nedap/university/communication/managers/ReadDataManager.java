@@ -20,6 +20,15 @@ public class ReadDataManager implements PacketManager {
 
 	@Override
 	public void processIncomingData(byte[] data) {
+		if (parser.getStatus(data) != HeaderConstructor.FIN) {
+			sendAck(data);
+		} else {
+			session.finalizeSession();
+		}
+
+	}
+
+	private void sendAck(byte[] data) {
 		printData(data);
 		byte[] oldHeader = parser.getHeader(data);
 		int dataLength = data.length - oldHeader.length;
@@ -31,8 +40,6 @@ public class ReadDataManager implements PacketManager {
 		System.arraycopy(header, 0, datagram, 0, header.length);
 
 		session.addToSendQueue(datagram);
-		session.finalizeSession();
-
 	}
 
 	private void printData(byte[] datagram) {
