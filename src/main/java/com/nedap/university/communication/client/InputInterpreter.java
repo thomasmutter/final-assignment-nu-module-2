@@ -25,8 +25,8 @@ public class InputInterpreter {
 
 	public byte[] getDatagramFromInput() {
 		String[] commandArray = command.split("\\s+");
-		byte[] header = formHeader(commandArray[0]);
-		byte[] data = new byte[1];
+		byte[] data = commandArray[1].getBytes();
+		byte[] header = formHeader(commandArray[0], data.length);
 
 		if (commandArray.length > 1) {
 			data = commandArray[1].getBytes();
@@ -50,7 +50,7 @@ public class InputInterpreter {
 		}
 	}
 
-	private byte[] formHeader(String command) {
+	private byte[] formHeader(String command, int payloadSize) {
 		byte flagsToSend = getFlagsFromCommand(command);
 		System.out.println("The flags are: " + flagsToSend);
 		byte status = 0;
@@ -58,7 +58,7 @@ public class InputInterpreter {
 		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = 0;
 		int checksum = 0;
-		int windowSize = 0;
+		int windowSize = payloadSize;
 		System.out.println("The payload size is: " + windowSize);
 		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
 	}

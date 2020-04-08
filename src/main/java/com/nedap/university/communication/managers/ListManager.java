@@ -30,8 +30,8 @@ public class ListManager implements PacketManager {
 	}
 
 	private void sendList(byte[] data) {
-		byte[] header = headerToSend(parser.getHeader(data));
 		byte[] payload = getBytesFromPath();
+		byte[] header = headerToSend(parser.getHeader(data), payload.length);
 
 		byte[] datagram = new byte[header.length + payload.length];
 
@@ -52,14 +52,14 @@ public class ListManager implements PacketManager {
 		return listString.getBytes();
 	}
 
-	public byte[] headerToSend(byte[] oldHeader) {
+	public byte[] headerToSend(byte[] oldHeader, int payloadSize) {
 		byte flags = HeaderConstructor.LS;
 		byte status = HeaderConstructor.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = parser.getSequenceNumber(oldHeader) + parser.getWindowSize(oldHeader);
 		int checksum = 0;
-		int windowSize = oldHeader.length;
+		int windowSize = payloadSize;
 //		System.out.println("The payload size is: " + windowSize);
 		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}

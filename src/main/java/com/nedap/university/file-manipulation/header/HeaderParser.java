@@ -10,6 +10,24 @@ public class HeaderParser {
 		return header;
 	}
 
+	public byte[] getData(byte[] datagram) {
+		byte[] data = new byte[datagram.length - HeaderConstructor.HEADERLENGTH];
+		int j = 0;
+		for (int i = HeaderConstructor.HEADERLENGTH; i < datagram.length; i++) {
+			data[j] = datagram[i];
+			j++;
+		}
+		return data;
+	}
+
+	public byte[] trimEmptyData(byte[] datagram) {
+		byte[] data = new byte[HeaderConstructor.HEADERLENGTH + getWindowSize(datagram)];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = datagram[i];
+		}
+		return data;
+	}
+
 	public int getChecksum(byte[] header) {
 		int[] checksumBytes = getBytes(header, 12, 2);
 		return getIntFromByteArray(checksumBytes);
