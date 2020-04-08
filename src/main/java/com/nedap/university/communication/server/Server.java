@@ -20,8 +20,7 @@ public class Server {
 		System.out.println("Request received");
 		RequestHandler handler = new RequestHandler();
 		session.setManager(handler.getPacketManagerFromRequest(request.getData(), session));
-		session.addToReadQueue(request);
-		session.startUp();
+		session.startUp(request);
 	}
 
 	private DatagramPacket receiveRequest() throws IOException {

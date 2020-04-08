@@ -1,6 +1,7 @@
 package remaking;
 
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 
 import client.InputInterpreter;
@@ -25,11 +26,17 @@ public class Client {
 			e.printStackTrace();
 		} // tui.getIp();
 
-		SessionV2 session = new SessionV2();
+		SessionV2 session = null;
+		try {
+			session = new SessionV2();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		InputInterpreter input = new InputInterpreter(command);
 		session.setManager(input.getPacketManagerFromInput(session));
 		session.addToSendQueue(input.getDatagramFromInput());
-		session.startUp();
+
 	}
 
 	public static void main(String[] args) {
