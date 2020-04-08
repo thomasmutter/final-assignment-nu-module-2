@@ -15,7 +15,9 @@ public class Initializing implements SessionState {
 
 	@Override
 	public byte[] composeDatagram(byte[] incomingDatagram) {
-		return setup.composeData(incomingDatagram);
+		System.out.println("reached1");
+		byte[] outgoingDatagram = setup.setupSession(session, incomingDatagram);
+		return outgoingDatagram;
 	}
 
 	@Override
@@ -25,6 +27,12 @@ public class Initializing implements SessionState {
 
 	public void setSetupManager(SetupManager setupArg) {
 		setup = setupArg;
+	}
+
+	@Override
+	public byte[] headerToSend(byte[] oldHeader) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

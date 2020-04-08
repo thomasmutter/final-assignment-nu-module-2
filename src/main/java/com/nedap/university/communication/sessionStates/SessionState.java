@@ -6,4 +6,6 @@ public interface SessionState {
 
 	void handleData();
 
+	byte[] headerToSend(byte[] oldHeader);
+
 }
