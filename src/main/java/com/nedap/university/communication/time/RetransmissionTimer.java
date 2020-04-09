@@ -14,7 +14,6 @@ public class RetransmissionTimer extends TimerTask {
 
 	@Override
 	public void run() {
-		System.out.println("Retransmission triggered");
 		keeper.retransmit(sequenceNumber);
 	}
 

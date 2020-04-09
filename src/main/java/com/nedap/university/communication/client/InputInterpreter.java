@@ -26,12 +26,13 @@ public class InputInterpreter {
 	}
 
 	public byte[] getDatagramFromInput() {
-		byte[] data = inputArray[1].getBytes();
-		byte[] header = formHeader(inputArray[0], data.length);
-
+		byte[] data;
 		if (inputArray.length > 1) {
 			data = inputArray[1].getBytes();
+		} else {
+			data = new byte[0];
 		}
+		byte[] header = formHeader(inputArray[0], data.length);
 
 		byte[] datagram = new byte[header.length + data.length];
 

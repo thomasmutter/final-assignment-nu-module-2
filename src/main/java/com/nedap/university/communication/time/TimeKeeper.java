@@ -37,7 +37,7 @@ public class TimeKeeper {
 	}
 
 	public void setRetransmissionTimer(byte[] datagram) {
-		int sequenceNumber = parser.getSequenceNumber(datagram);
+		int sequenceNumber = parser.getSequenceNumber(parser.getHeader(datagram));
 		unAckedPackets.put(sequenceNumber, datagram);
 		Timer timer = new Timer();
 		timer.schedule(new RetransmissionTimer(this, sequenceNumber), TIMEOUT);
@@ -45,12 +45,13 @@ public class TimeKeeper {
 
 	public void retransmit(int sequenceNumber) {
 		if (unAckedPackets.containsKey(sequenceNumber)) {
+			System.out.println("Retransmission triggered");
 			session.addToSendQueue(unAckedPackets.get(sequenceNumber));
 		}
 	}
 
 	public void processIncomingAck(byte[] datagram) {
-		int ackNumber = parser.getAcknowledgementNumber(datagram);
+		int ackNumber = parser.getAcknowledgementNumber(parser.getHeader(datagram));
 		unAckedPackets.remove(ackNumber);
 	}
 }

@@ -36,8 +36,8 @@ public class DatagramSender implements Runnable {
 		while (!socket.isClosed()) {
 			try {
 				DatagramPacket packetToSend = queue.take();
-				keeper.setRetransmissionTimer(packetToSend.getData());
 				socket.send(packetToSend);
+				keeper.setRetransmissionTimer(packetToSend.getData());
 			} catch (IOException e) {
 				System.out.println("Sender closed");
 				// e.printStackTrace();
