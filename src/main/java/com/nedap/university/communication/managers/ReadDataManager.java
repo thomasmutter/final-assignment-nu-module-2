@@ -1,18 +1,16 @@
 package managers;
 
-import java.util.Random;
-
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class ReadDataManager implements PacketManager {
 
-	private SessionV2 session;
+	private Session session;
 	private HeaderConstructor headerConstructor;
 	private HeaderParser parser;
 
-	public ReadDataManager(SessionV2 sessionArg) {
+	public ReadDataManager(Session sessionArg) {
 		session = sessionArg;
 		headerConstructor = new HeaderConstructor();
 		parser = new HeaderParser();
@@ -23,17 +21,14 @@ public class ReadDataManager implements PacketManager {
 		if (parser.getStatus(data) != HeaderConstructor.FIN) {
 			sendAck(data);
 		} else {
-			session.finalizeSession();
+			session.finalizeSession(data);
 		}
 
 	}
 
 	private void sendAck(byte[] data) {
 		printData(data);
-		byte[] oldHeader = parser.getHeader(data);
-		int dataLength = data.length - oldHeader.length;
-
-		byte[] header = headerToSend(parser.getHeader(data), dataLength);
+		byte[] header = headerToSend(parser.getHeader(data));
 
 		byte[] datagram = new byte[header.length];
 
@@ -52,12 +47,12 @@ public class ReadDataManager implements PacketManager {
 		System.out.println(new String(data));
 	}
 
-	public byte[] headerToSend(byte[] oldHeader, int receivedPayloadLength) {
+	public byte[] headerToSend(byte[] oldHeader) {
 		byte flags = HeaderConstructor.LS;
 		byte status = HeaderConstructor.ACK;
-		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = parser.getSequenceNumber(oldHeader) + receivedPayloadLength;
+		int seqNo = parser.getAcknowledgementNumber(oldHeader) + 1;
+//		System.out.println("Sending packet with seqNo: " + seqNo);
+		int ackNo = parser.getSequenceNumber(oldHeader);
 		int checksum = 0;
 		int windowSize = 0;
 		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);

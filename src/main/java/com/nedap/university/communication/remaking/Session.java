@@ -11,13 +11,13 @@ import queues.DatagramReceiver;
 import queues.DatagramSender;
 import time.TimeKeeper;
 
-public class SessionV2 {
+public class Session {
 
 	private PacketManager manager;
 	private DatagramSender sender;
 	private DatagramReceiver receiver;
 
-	public SessionV2() throws SocketException {
+	public Session() throws SocketException {
 		initialize();
 	}
 
@@ -44,16 +44,16 @@ public class SessionV2 {
 		manager = managerArg;
 	}
 
-	public void finalizeSession() {
-		System.out.println("Finalization steps requested by packet manager");
+	public void finalizeSession(byte[] data) {
+		// System.out.println("Finalization steps requested by packet manager");
 		manager = new CleanUpManager(this);
-		((CleanUpManager) manager).sendFin(HeaderConstructor.FIN);
+		((CleanUpManager) manager).sendFin(HeaderConstructor.FIN, data);
 	}
 
 	public void giveDatagramToManager(DatagramPacket datagram) {
 		byte[] data = datagram.getData();
 		manager.processIncomingData(data);
-		System.out.println("Packet given to manager for processing");
+		// System.out.println("Packet given to manager for processing");
 	}
 
 	public void shutdown() {

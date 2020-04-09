@@ -1,14 +1,14 @@
 package managers;
 
 import fileConversion.ConversionHandler;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class UploadManager implements PacketManager {
 
-	private SessionV2 session;
+	private Session session;
 	private byte[] fileAsBytes;
 
-	public UploadManager(SessionV2 sessionArg, String pathArg) {
+	public UploadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;
 		initialize(pathArg);
 	}

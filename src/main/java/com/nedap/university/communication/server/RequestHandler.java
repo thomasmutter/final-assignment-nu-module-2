@@ -7,7 +7,7 @@ import managers.ListManager;
 import managers.PacketManager;
 import managers.RemoveManager;
 import managers.UploadManager;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class RequestHandler {
 
@@ -18,7 +18,7 @@ public class RequestHandler {
 		parser = new HeaderParser();
 	}
 
-	public PacketManager getPacketManagerFromRequest(byte[] data, SessionV2 session) {
+	public PacketManager getPacketManagerFromRequest(byte[] data, Session session) {
 		switch (parser.getCommand(parser.getHeader(data))) {
 		case HeaderConstructor.UL:
 			return new DownloadManager(session, PATH + getFileNameFromDatagram(data));

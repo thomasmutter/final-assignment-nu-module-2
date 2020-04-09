@@ -59,7 +59,7 @@ public class HeaderParser {
 	private int[] getBytes(byte[] header, int startIndex, int totalBytes) {
 		int[] bytes = new int[totalBytes];
 		for (int i = 0; i < totalBytes; i++) {
-			bytes[i] = (int) header[startIndex];
+			bytes[i] = (((int) header[startIndex]) & 0xFF);
 			startIndex++;
 		}
 		return bytes;

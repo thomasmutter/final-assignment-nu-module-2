@@ -4,16 +4,16 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
-import remaking.SessionV2;
+import remaking.Session;
 import time.TimeKeeper;
 
 public class DatagramReceiver implements Runnable {
 
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
-	private SessionV2 session;
+	private Session session;
 
-	public DatagramReceiver(DatagramSocket socketArg, SessionV2 sessionArg, TimeKeeper keeperArg) {
+	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
 		keeper = keeperArg;
@@ -30,12 +30,15 @@ public class DatagramReceiver implements Runnable {
 		} catch (IOException e) {
 			System.out.println("Reader closed");
 		}
+		System.out.println("Stopped");
 	}
 
 	private DatagramPacket receiveDatagram() throws IOException {
 		byte[] buffer = new byte[512];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
+		System.out.println("Blocking at receive");
 		socket.receive(incomingDatagram);
+		System.out.println("Receiving succesfull");
 		keeper.processIncomingAck(incomingDatagram.getData());
 		return incomingDatagram;
 	}

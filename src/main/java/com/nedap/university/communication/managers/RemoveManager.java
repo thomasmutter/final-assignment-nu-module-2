@@ -5,16 +5,16 @@ import java.util.Random;
 
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class RemoveManager implements PacketManager {
 
-	private SessionV2 session;
+	private Session session;
 	private HeaderConstructor headerConstructor;
 	private HeaderParser parser;
 	private static final String PATH = "src/main/java/com/nedap/university/resources";
 
-	public RemoveManager(SessionV2 sessionArg) {
+	public RemoveManager(Session sessionArg) {
 		session = sessionArg;
 		headerConstructor = new HeaderConstructor();
 		parser = new HeaderParser();
@@ -26,7 +26,7 @@ public class RemoveManager implements PacketManager {
 			removeFile(getFileNameFromDatagram(data));
 			session.addToSendQueue(headerToSend(data, 0));
 		} else {
-			session.finalizeSession();
+			session.finalizeSession(data);
 		}
 	}
 
@@ -52,7 +52,7 @@ public class RemoveManager implements PacketManager {
 		byte status = HeaderConstructor.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = parser.getSequenceNumber(oldHeader) + parser.getWindowSize(oldHeader);
+		int ackNo = parser.getSequenceNumber(oldHeader);
 		int checksum = 0;
 		int windowSize = payloadSize;
 //		System.out.println("The payload size is: " + windowSize);

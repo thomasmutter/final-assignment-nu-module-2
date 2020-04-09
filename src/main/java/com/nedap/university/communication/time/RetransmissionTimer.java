@@ -15,6 +15,8 @@ public class RetransmissionTimer extends TimerTask {
 	@Override
 	public void run() {
 		keeper.retransmit(sequenceNumber);
+		System.out.println(Thread.currentThread().getName() + " is done");
+		this.cancel();
 	}
 
 }

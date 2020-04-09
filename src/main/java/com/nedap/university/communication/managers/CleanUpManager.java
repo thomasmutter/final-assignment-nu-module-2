@@ -2,17 +2,17 @@ package managers;
 
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.SessionV2;
+import remaking.Session;
 import time.TimeKeeper;
 
 public class CleanUpManager implements PacketManager {
 
 	private HeaderConstructor constructor;
 	private HeaderParser parser;
-	private SessionV2 session;
+	private Session session;
 	private TimeKeeper keeper;
 
-	public CleanUpManager(SessionV2 sessionArg) {
+	public CleanUpManager(Session sessionArg) {
 		session = sessionArg;
 		constructor = new HeaderConstructor();
 		parser = new HeaderParser();
@@ -24,34 +24,34 @@ public class CleanUpManager implements PacketManager {
 		if (parser.getStatus(data) == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
 			session.shutdown();
 		} else {
-			sendFin((byte) (HeaderConstructor.FIN + HeaderConstructor.ACK));
+			sendFin((byte) (HeaderConstructor.FIN + HeaderConstructor.ACK), data);
 			keeper.setFinTimer();
 		}
 
 	}
 
-	public void sendFin(byte statusArg) {
+	public void sendFin(byte statusArg, byte[] data) {
 		String dataString = "FIN";
-		byte[] finDatagram = formHeader(statusArg);
+		byte[] finDatagram = formHeader(statusArg, parser.getHeader(data));
 		if (statusArg == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
 			dataString = dataString + " ACK";
 		}
-		byte[] data = dataString.getBytes();
-		System.out.println(dataString + " sent");
+		byte[] payload = dataString.getBytes();
+//		System.out.println(dataString + " sent");
 
-		byte[] datagram = new byte[finDatagram.length + data.length];
+		byte[] datagram = new byte[finDatagram.length + payload.length];
 
 		System.arraycopy(finDatagram, 0, datagram, 0, finDatagram.length);
-		System.arraycopy(data, 0, datagram, finDatagram.length, data.length);
+		System.arraycopy(payload, 0, datagram, finDatagram.length, payload.length);
 
 		session.addToSendQueue(datagram);
 	}
 
-	private byte[] formHeader(byte statusArg) {
+	private byte[] formHeader(byte statusArg, byte[] oldHeader) {
 		byte flags = 0;
 		byte status = statusArg;
-		int seqNo = 0;
-		int ackNo = 0;
+		int seqNo = parser.getAcknowledgementNumber(oldHeader) + 1;
+		int ackNo = parser.getSequenceNumber(oldHeader);
 		int checksum = 0;
 		int windowSize = 0;
 		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);

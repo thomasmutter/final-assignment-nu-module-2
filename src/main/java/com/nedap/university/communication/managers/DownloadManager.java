@@ -1,15 +1,15 @@
 package managers;
 
 import fileConversion.ConversionHandler;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class DownloadManager implements PacketManager {
 
-	private SessionV2 session;
+	private Session session;
 	private String path;
 	private byte[] fileAsBytes;
 
-	public DownloadManager(SessionV2 sessionArg, String pathArg) {
+	public DownloadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;
 		path = pathArg;
 	}

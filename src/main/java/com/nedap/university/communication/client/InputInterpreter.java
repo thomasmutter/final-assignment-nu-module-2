@@ -9,7 +9,7 @@ import managers.DownloadManager;
 import managers.PacketManager;
 import managers.ReadDataManager;
 import managers.UploadManager;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class InputInterpreter {
 
@@ -41,7 +41,7 @@ public class InputInterpreter {
 		return datagram;
 	}
 
-	public PacketManager getPacketManagerFromInput(SessionV2 session) {
+	public PacketManager getPacketManagerFromInput(Session session) {
 		switch (getFlagsFromCommand(inputArray[0])) {
 		case HeaderConstructor.UL:
 			return new UploadManager(session, PATH + inputArray[1]);
@@ -54,14 +54,12 @@ public class InputInterpreter {
 
 	private byte[] formHeader(String command, int payloadSize) {
 		byte flagsToSend = getFlagsFromCommand(command);
-		System.out.println("The flags are: " + flagsToSend);
 		byte status = 0;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-		System.out.println("Sending packet with seqNo: " + seqNo);
+//		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = 0;
 		int checksum = 0;
 		int windowSize = payloadSize;
-		System.out.println("The payload size is: " + windowSize);
 		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
 	}
 

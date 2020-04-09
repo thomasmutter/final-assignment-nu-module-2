@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Timer;
 
 import header.HeaderParser;
-import remaking.SessionV2;
+import remaking.Session;
 
 public class TimeKeeper {
 
@@ -13,13 +13,22 @@ public class TimeKeeper {
 
 	private int finTimersSet;
 	private Map<Integer, byte[]> unAckedPackets;
-	private SessionV2 session;
+	private Session session;
 	private HeaderParser parser;
+	private OwnTimer timer;
 
-	public TimeKeeper(SessionV2 sessionArg) {
+	public TimeKeeper(Session sessionArg) {
 		session = sessionArg;
 		unAckedPackets = new HashMap<>();
 		parser = new HeaderParser();
+		initiateRetransmissionTimer();
+	}
+
+	private void initiateRetransmissionTimer() {
+		timer = new OwnTimer(this);
+		Thread timerThread = new Thread(timer);
+		timerThread.setDaemon(true);
+		timerThread.start();
 	}
 
 	public int getFinTimersSet() {
@@ -28,30 +37,39 @@ public class TimeKeeper {
 
 	public void setFinTimer() {
 		finTimersSet++;
-		Timer timer = new Timer();
-		timer.schedule(new FinTimer(this, session), 0);
+		Timer timer = new Timer(true);
+		timer.schedule(new FinTimer(this, session), TIMEOUT * 2);
 	}
 
 	public void decrementFinTimers() {
 		finTimersSet--;
 	}
 
+//	public void setRetransmissionTimer(byte[] datagram) {
+//		int sequenceNumber = parser.getSequenceNumber(parser.getHeader(datagram));
+//		// System.out.println("Timer set for datagram with seqNo: " + sequenceNumber);
+//		unAckedPackets.put(sequenceNumber, datagram);
+//		Timer timer = new Timer();
+//		timer.schedule(new RetransmissionTimer(this, sequenceNumber), TIMEOUT);
+//	}
+
 	public void setRetransmissionTimer(byte[] datagram) {
 		int sequenceNumber = parser.getSequenceNumber(parser.getHeader(datagram));
 		unAckedPackets.put(sequenceNumber, datagram);
-		Timer timer = new Timer();
-		timer.schedule(new RetransmissionTimer(this, sequenceNumber), TIMEOUT);
+		timer.getTimerMap().put(System.currentTimeMillis(), sequenceNumber);
 	}
 
 	public void retransmit(int sequenceNumber) {
-		if (unAckedPackets.containsKey(sequenceNumber)) {
-			System.out.println("Retransmission triggered");
-			session.addToSendQueue(unAckedPackets.get(sequenceNumber));
-		}
+//		if (unAckedPackets.containsKey(sequenceNumber)) {
+		System.out.println("Resending packet with seqNo " + sequenceNumber);
+		session.addToSendQueue(unAckedPackets.get(sequenceNumber));
+//		}
 	}
 
 	public void processIncomingAck(byte[] datagram) {
 		int ackNumber = parser.getAcknowledgementNumber(parser.getHeader(datagram));
+		System.out.println("Datagram with sequenceNumber: " + ackNumber + " is acked");
 		unAckedPackets.remove(ackNumber);
+		timer.getTimerMap().values().remove(ackNumber);
 	}
 }
