@@ -11,6 +11,7 @@ import remaking.SessionV2;
 
 public class RequestHandler {
 
+	private static final String PATH = "test-folder";
 	private HeaderParser parser;
 
 	public RequestHandler() {
@@ -20,13 +21,18 @@ public class RequestHandler {
 	public PacketManager getPacketManagerFromRequest(byte[] data, SessionV2 session) {
 		switch (parser.getCommand(parser.getHeader(data))) {
 		case HeaderConstructor.UL:
-			return new DownloadManager(session);
+			return new DownloadManager(session, PATH + getFileNameFromDatagram(data));
 		case HeaderConstructor.DL:
-			return new UploadManager(session);
+			return new UploadManager(session, PATH + getFileNameFromDatagram(data));
 		case HeaderConstructor.RM:
 			return new RemoveManager(session);
 		default:
 			return new ListManager(session);
 		}
+	}
+
+	private String getFileNameFromDatagram(byte[] data) {
+		byte[] payload = parser.getData(parser.trimEmptyData(data));
+		return new String(payload);
 	}
 }

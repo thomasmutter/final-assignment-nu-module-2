@@ -13,23 +13,24 @@ import remaking.SessionV2;
 
 public class InputInterpreter {
 
-	private String command;
+	private static final String PATH = "src/main/java/com/nedap/university/resources";
 	private static List<String> commandList;
+
 	private HeaderConstructor header;
+	private String[] inputArray;
 
 	public InputInterpreter(String input) {
-		command = input;
+		inputArray = input.split("\\s+");
 		header = new HeaderConstructor();
 		initializeCommandList();
 	}
 
 	public byte[] getDatagramFromInput() {
-		String[] commandArray = command.split("\\s+");
-		byte[] data = commandArray[1].getBytes();
-		byte[] header = formHeader(commandArray[0], data.length);
+		byte[] data = inputArray[1].getBytes();
+		byte[] header = formHeader(inputArray[0], data.length);
 
-		if (commandArray.length > 1) {
-			data = commandArray[1].getBytes();
+		if (inputArray.length > 1) {
+			data = inputArray[1].getBytes();
 		}
 
 		byte[] datagram = new byte[header.length + data.length];
@@ -40,11 +41,11 @@ public class InputInterpreter {
 	}
 
 	public PacketManager getPacketManagerFromInput(SessionV2 session) {
-		switch (getFlagsFromCommand(command.split("\\s+")[0])) {
+		switch (getFlagsFromCommand(inputArray[0])) {
 		case HeaderConstructor.UL:
-			return new UploadManager(session);
+			return new UploadManager(session, PATH + inputArray[1]);
 		case HeaderConstructor.DL:
-			return new DownloadManager(session);
+			return new DownloadManager(session, PATH + inputArray[1]);
 		default:
 			return new ReadDataManager(session);
 		}

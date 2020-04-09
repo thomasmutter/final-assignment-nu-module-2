@@ -9,6 +9,7 @@ import managers.CleanUpManager;
 import managers.PacketManager;
 import queues.DatagramReceiver;
 import queues.DatagramSender;
+import time.TimeKeeper;
 
 public class SessionV2 {
 
@@ -22,8 +23,9 @@ public class SessionV2 {
 
 	private void initialize() throws SocketException {
 		DatagramSocket socket = new DatagramSocket();
-		receiver = new DatagramReceiver(socket, this);
-		sender = new DatagramSender(socket);
+		TimeKeeper keeper = new TimeKeeper(this);
+		receiver = new DatagramReceiver(socket, this, keeper);
+		sender = new DatagramSender(socket, keeper);
 		new Thread(receiver).start();
 		new Thread(sender).start();
 	}

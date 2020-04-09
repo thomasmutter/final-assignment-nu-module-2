@@ -8,14 +8,17 @@ import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import time.TimeKeeper;
+
 public class DatagramSender implements Runnable {
 
 	private InetAddress address;
 	private int port;
 	private BlockingQueue<DatagramPacket> queue;
 	private DatagramSocket socket;
+	private TimeKeeper keeper;
 
-	public DatagramSender(DatagramSocket socketArg) {
+	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
 		port = 8888;
 		try {
 			address = InetAddress.getByName("127.0.0.1");
@@ -25,6 +28,7 @@ public class DatagramSender implements Runnable {
 		}
 		queue = new LinkedBlockingQueue<>();
 		socket = socketArg;
+		keeper = keeperArg;
 	}
 
 	@Override
@@ -32,6 +36,7 @@ public class DatagramSender implements Runnable {
 		while (!socket.isClosed()) {
 			try {
 				DatagramPacket packetToSend = queue.take();
+				keeper.setRetransmissionTimer(packetToSend.getData());
 				socket.send(packetToSend);
 			} catch (IOException e) {
 				System.out.println("Sender closed");
