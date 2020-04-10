@@ -3,6 +3,7 @@ package queues;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Random;
 
 import remaking.Session;
 import time.TimeKeeper;
@@ -22,10 +23,24 @@ public class DatagramReceiver implements Runnable {
 	@Override
 	public void run() {
 		try {
-			session.startUp(receiveDatagram());
+			DatagramPacket firstPacket = receiveDatagram();
+			keeper.processIncomingAck(firstPacket.getData());
+			session.startUp(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
-				session.giveDatagramToManager(receivedPacket);
+				Random random = new Random();
+				if (random.nextInt(100) < 50) {
+					keeper.processIncomingAck(receivedPacket.getData());
+					session.giveDatagramToManager(receivedPacket);
+				} else {
+					System.out.println("Packet lost");
+					try {
+						Thread.sleep(2000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
 		} catch (IOException e) {
 			System.out.println("Reader closed");
@@ -36,10 +51,9 @@ public class DatagramReceiver implements Runnable {
 	private DatagramPacket receiveDatagram() throws IOException {
 		byte[] buffer = new byte[512];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
-		System.out.println("Blocking at receive");
 		socket.receive(incomingDatagram);
 		System.out.println("Receiving succesfull");
-		keeper.processIncomingAck(incomingDatagram.getData());
+
 		return incomingDatagram;
 	}
 

@@ -43,6 +43,7 @@ public class DatagramSender implements Runnable {
 				socket.send(packetToSend);
 				System.out.println("Sent packet with seqNo " + parser.getSequenceNumber(packetToSend.getData()));
 				System.out.println("This packet has ackNo " + parser.getAcknowledgementNumber(packetToSend.getData()));
+				System.out.println("This packet has windowSize " + parser.getWindowSize(packetToSend.getData()));
 				System.out.println("");
 				keeper.setRetransmissionTimer(packetToSend.getData());
 			} catch (IOException e) {

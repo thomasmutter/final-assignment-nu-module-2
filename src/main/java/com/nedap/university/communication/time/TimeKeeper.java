@@ -60,10 +60,10 @@ public class TimeKeeper {
 	}
 
 	public void retransmit(int sequenceNumber) {
-//		if (unAckedPackets.containsKey(sequenceNumber)) {
-		System.out.println("Resending packet with seqNo " + sequenceNumber);
-		session.addToSendQueue(unAckedPackets.get(sequenceNumber));
-//		}
+		if (unAckedPackets.containsKey(sequenceNumber)) {
+			System.out.println("Resending packet with seqNo " + sequenceNumber);
+			session.addToSendQueue(unAckedPackets.get(sequenceNumber));
+		}
 	}
 
 	public void processIncomingAck(byte[] datagram) {
@@ -71,5 +71,6 @@ public class TimeKeeper {
 		System.out.println("Datagram with sequenceNumber: " + ackNumber + " is acked");
 		unAckedPackets.remove(ackNumber);
 		timer.getTimerMap().values().remove(ackNumber);
+		System.out.println("Ack removed from maps");
 	}
 }

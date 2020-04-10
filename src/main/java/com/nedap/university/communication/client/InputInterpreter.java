@@ -13,7 +13,7 @@ import remaking.Session;
 
 public class InputInterpreter {
 
-	private static final String PATH = "src/main/java/com/nedap/university/resources";
+	private static final String PATH = "src/main/java/com/nedap/university/resources/";
 	private static List<String> commandList;
 
 	private HeaderConstructor header;

@@ -21,6 +21,7 @@ public class HeaderParser {
 	}
 
 	public byte[] trimEmptyData(byte[] datagram) {
+		System.out.println("The window size is: " + getWindowSize(datagram));
 		byte[] data = new byte[HeaderConstructor.HEADERLENGTH + getWindowSize(datagram)];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = datagram[i];
@@ -44,6 +45,7 @@ public class HeaderParser {
 	}
 
 	public int getAcknowledgementNumber(byte[] header) {
+		System.out.println("The length of the header is " + header.length);
 		int[] ackBytes = getBytes(header, 6, 4);
 		return getIntFromByteArray(ackBytes);
 	}

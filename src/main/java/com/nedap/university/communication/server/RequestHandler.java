@@ -1,5 +1,7 @@
 package server;
 
+import java.io.File;
+
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managers.DownloadManager;
@@ -21,9 +23,9 @@ public class RequestHandler {
 	public PacketManager getPacketManagerFromRequest(byte[] data, Session session) {
 		switch (parser.getCommand(parser.getHeader(data))) {
 		case HeaderConstructor.UL:
-			return new DownloadManager(session, PATH + getFileNameFromDatagram(data));
+			return new DownloadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
 		case HeaderConstructor.DL:
-			return new UploadManager(session, PATH + getFileNameFromDatagram(data));
+			return new UploadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
 		case HeaderConstructor.RM:
 			return new RemoveManager(session);
 		default:

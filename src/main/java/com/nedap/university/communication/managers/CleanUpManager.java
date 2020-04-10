@@ -32,12 +32,12 @@ public class CleanUpManager implements PacketManager {
 
 	public void sendFin(byte statusArg, byte[] data) {
 		String dataString = "FIN";
-		byte[] finDatagram = formHeader(statusArg, parser.getHeader(data));
+		byte[] finDatagram = formHeader(statusArg, data);
 		if (statusArg == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
 			dataString = dataString + " ACK";
 		}
 		byte[] payload = dataString.getBytes();
-//		System.out.println(dataString + " sent");
+		System.out.println(dataString + " sent");
 
 		byte[] datagram = new byte[finDatagram.length + payload.length];
 
@@ -53,7 +53,7 @@ public class CleanUpManager implements PacketManager {
 		int seqNo = parser.getAcknowledgementNumber(oldHeader) + 1;
 		int ackNo = parser.getSequenceNumber(oldHeader);
 		int checksum = 0;
-		int windowSize = 0;
+		int windowSize = 1;
 		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 
