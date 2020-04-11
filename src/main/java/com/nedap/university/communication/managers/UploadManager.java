@@ -19,7 +19,7 @@ public class UploadManager implements PacketManager {
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		algorithm.handleIncomingDatagram(data);
+		algorithm.moveDatagramWindow(data);
 	}
 
 	public void endUpload(byte[] data) {

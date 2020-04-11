@@ -15,7 +15,7 @@ public class TimeKeeper {
 	private Map<Integer, byte[]> unAckedPackets;
 	private Session session;
 	private HeaderParser parser;
-	private OwnTimer timer;
+	protected OwnTimer timer;
 
 	public TimeKeeper(Session sessionArg) {
 		session = sessionArg;
@@ -24,7 +24,7 @@ public class TimeKeeper {
 		initiateRetransmissionTimer();
 	}
 
-	private void initiateRetransmissionTimer() {
+	protected void initiateRetransmissionTimer() {
 		timer = new OwnTimer(this);
 		Thread timerThread = new Thread(timer);
 		timerThread.setDaemon(true);
@@ -38,7 +38,7 @@ public class TimeKeeper {
 	public void setFinTimer() {
 		finTimersSet++;
 		Timer timer = new Timer(true);
-		timer.schedule(new FinTimer(this, session), TIMEOUT * 2);
+		timer.schedule(new FinTimer(this, session), TIMEOUT * 5);
 	}
 
 	public void decrementFinTimers() {

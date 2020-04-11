@@ -4,8 +4,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
-import header.HeaderConstructor;
-import managers.CleanUpManager;
 import managers.PacketManager;
 import queues.DatagramReceiver;
 import queues.DatagramSender;
@@ -21,7 +19,7 @@ public class Session {
 		initialize();
 	}
 
-	private void initialize() throws SocketException {
+	protected void initialize() throws SocketException {
 		DatagramSocket socket = new DatagramSocket();
 		TimeKeeper keeper = new TimeKeeper(this);
 		receiver = new DatagramReceiver(socket, this, keeper);
@@ -44,16 +42,15 @@ public class Session {
 		manager = managerArg;
 	}
 
-	public void finalizeSession(byte[] data) {
-		// System.out.println("Finalization steps requested by packet manager");
-		manager = new CleanUpManager(this);
-		((CleanUpManager) manager).sendFin(HeaderConstructor.FIN, data);
-	}
+//	public void finalizeSession(byte[] data) {
+//		// System.out.println("Finalization steps requested by packet manager");
+//		manager = new CleanUpManager(this);
+//		((CleanUpManager) manager).sendFin(HeaderConstructor.FIN, data);
+//	}
 
 	public void giveDatagramToManager(DatagramPacket datagram) {
 		byte[] data = datagram.getData();
 		manager.processIncomingData(data);
-		// System.out.println("Packet given to manager for processing");
 	}
 
 	public void shutdown() {

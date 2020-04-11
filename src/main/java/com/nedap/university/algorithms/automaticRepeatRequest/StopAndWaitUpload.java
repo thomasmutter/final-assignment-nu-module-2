@@ -15,7 +15,7 @@ public class StopAndWaitUpload extends StopAndWait {
 	}
 
 	@Override
-	public void handleIncomingDatagram(byte[] datagram) {
+	public void moveDatagramWindow(byte[] datagram) {
 		int segmentLength = Math.min(segmentSize, manager.getFileLength() - lastByteSent);
 		System.out.println("The segmentLength sent is " + segmentLength);
 		byte[] header = formHeader(datagram, segmentLength);

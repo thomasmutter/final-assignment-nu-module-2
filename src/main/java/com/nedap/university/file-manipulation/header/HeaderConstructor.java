@@ -19,6 +19,11 @@ public class HeaderConstructor {
 	public static final byte ACK = 1;
 	public static final byte FIN = 2;
 
+	/**
+	 * Standard payloadSize of acknowledgement messages
+	 */
+	public static final int ACKSIZE = 1;
+
 	public static final int HEADERLENGTH = 14;
 	private static final int NUMBERBYTES = 4;
 

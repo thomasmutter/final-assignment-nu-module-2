@@ -29,7 +29,7 @@ public class DatagramReceiver implements Runnable {
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
-				if (random.nextInt(100) < 50) {
+				if (random.nextInt(100) < 10) {
 					keeper.processIncomingAck(receivedPacket.getData());
 					session.giveDatagramToManager(receivedPacket);
 				} else {

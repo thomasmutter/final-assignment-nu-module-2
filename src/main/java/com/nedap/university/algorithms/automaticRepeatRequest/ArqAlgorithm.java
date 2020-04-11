@@ -2,8 +2,12 @@ package automaticRepeatRequest;
 
 public interface ArqAlgorithm {
 
-	boolean datagramInWindow(byte[] datagram);
+	boolean datagramInWindow(int incomingSeqNo, int payloadSize);
 
-	void handleIncomingDatagram(byte[] datagram);
+	void moveDatagramWindow(int seqNo, int payloadSize);
+
+	int getAckNo();
+
+	int getWindowSize();
 
 }

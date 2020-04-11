@@ -4,8 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import download.DownloadEstablished;
+import download.DownloadManager;
 import header.HeaderConstructor;
-import managers.DownloadManager;
 import managers.PacketManager;
 import managers.ReadDataManager;
 import managers.UploadManager;
@@ -30,7 +31,7 @@ public class InputInterpreter {
 		if (inputArray.length > 1) {
 			data = inputArray[1].getBytes();
 		} else {
-			data = new byte[0];
+			data = new byte[1];
 		}
 		byte[] header = formHeader(inputArray[0], data.length);
 
@@ -46,7 +47,9 @@ public class InputInterpreter {
 		case HeaderConstructor.UL:
 			return new UploadManager(session, PATH + inputArray[1]);
 		case HeaderConstructor.DL:
-			return new DownloadManager(session, PATH + inputArray[1]);
+			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
+			manager.setManagerState(new DownloadEstablished(manager));
+			return manager;
 		default:
 			return new ReadDataManager(session);
 		}

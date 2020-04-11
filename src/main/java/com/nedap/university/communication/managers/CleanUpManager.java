@@ -3,36 +3,31 @@ package managers;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
-import time.TimeKeeper;
+import sessionTermination.Terminator;
 
 public class CleanUpManager implements PacketManager {
 
 	private HeaderConstructor constructor;
 	private HeaderParser parser;
 	private Session session;
-	private TimeKeeper keeper;
+	private Terminator terminator;
 
 	public CleanUpManager(Session sessionArg) {
 		session = sessionArg;
 		constructor = new HeaderConstructor();
 		parser = new HeaderParser();
-		keeper = new TimeKeeper(session);
 	}
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		if (parser.getStatus(data) == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
-			session.shutdown();
-		} else {
-			sendFin((byte) (HeaderConstructor.FIN + HeaderConstructor.ACK), data);
-			keeper.setFinTimer();
-		}
-
+		int seqNo = parser.getSequenceNumber(data);
+		int ackNo = parser.getAcknowledgementNumber(data);
+		terminator.terminateSession(seqNo, ackNo);
 	}
 
-	public void sendFin(byte statusArg, byte[] data) {
+	public void sendFin(byte statusArg, int seqNo, int ackNo) {
 		String dataString = "FIN";
-		byte[] finDatagram = formHeader(statusArg, data);
+		byte[] finDatagram = formHeader(statusArg, seqNo, ackNo);
 		if (statusArg == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
 			dataString = dataString + " ACK";
 		}
@@ -47,14 +42,22 @@ public class CleanUpManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	private byte[] formHeader(byte statusArg, byte[] oldHeader) {
+	private byte[] formHeader(byte statusArg, int seqNoArg, int ackNoArg) {
 		byte flags = 0;
 		byte status = statusArg;
-		int seqNo = parser.getAcknowledgementNumber(oldHeader) + 1;
-		int ackNo = parser.getSequenceNumber(oldHeader);
+		int seqNo = seqNoArg;
+		int ackNo = ackNoArg;
 		int checksum = 0;
 		int windowSize = 1;
 		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+	}
+
+	public void setTerminator(Terminator terminatorArg) {
+		terminator = terminatorArg;
+	}
+
+	public void shutdownSession() {
+		session.shutdown();
 	}
 
 }

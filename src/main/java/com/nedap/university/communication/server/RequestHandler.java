@@ -2,9 +2,9 @@ package server;
 
 import java.io.File;
 
+import download.DownloadManager;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import managers.DownloadManager;
 import managers.ListManager;
 import managers.PacketManager;
 import managers.RemoveManager;
