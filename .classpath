@@ -6,6 +6,7 @@
 	<classpathentry kind="src" path="src/main/java/com/nedap/university/file-manipulation"/>
 	<classpathentry kind="src" path="src/main/java/com/nedap/university/test"/>
 	<classpathentry kind="src" path="src/main/java/com/nedap/university/TUI"/>
+	<classpathentry kind="src" path="src/main/java/com/nedap/university/algorithms"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>

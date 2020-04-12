@@ -3,37 +3,63 @@ package queues;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Random;
 
-import remaking.SessionV2;
+import header.HeaderParser;
+import remaking.Session;
+import time.TimeKeeper;
 
 public class DatagramReceiver implements Runnable {
 
 	private DatagramSocket socket;
-	private SessionV2 session;
+	private TimeKeeper keeper;
+	private Session session;
+	private HeaderParser parser;
 
-	public DatagramReceiver(DatagramSocket socketArg, SessionV2 sessionArg) {
+	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
+		keeper = keeperArg;
+		parser = new HeaderParser();
 	}
 
 	@Override
 	public void run() {
 		try {
-			session.startUp(receiveDatagram());
+			DatagramPacket firstPacket = receiveDatagram();
+			keeper.processIncomingAck(firstPacket.getData());
+			session.startUp(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
-				System.out.println(receivedPacket);
-				session.giveDatagramToManager(receivedPacket);
+				Random random = new Random();
+				if (random.nextInt(100) < 50) {
+					System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
+					System.out.println(
+							"Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+					keeper.processIncomingAck(receivedPacket.getData());
+					session.giveDatagramToManager(receivedPacket);
+				} else {
+					System.out.println("----- PACKET LOSS ------");
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+				}
 			}
 		} catch (IOException e) {
 			System.out.println("Reader closed");
 		}
+		System.out.println("Stopped");
 	}
 
 	private DatagramPacket receiveDatagram() throws IOException {
 		byte[] buffer = new byte[512];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
 		socket.receive(incomingDatagram);
+		System.out.println("Receiving succesfull");
+
 		return incomingDatagram;
 	}
 

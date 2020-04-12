@@ -26,16 +26,17 @@ public class Client {
 			e.printStackTrace();
 		} // tui.getIp();
 
-		SessionV2 session = null;
+		Session session = null;
 		try {
-			session = new SessionV2();
+			session = new Session();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		InputInterpreter input = new InputInterpreter(command);
+		byte[] inputDatagram = input.getDatagramFromInput();
 		session.setManager(input.getPacketManagerFromInput(session));
-		session.addToSendQueue(input.getDatagramFromInput());
+		session.addToSendQueue(inputDatagram);
 
 	}
 

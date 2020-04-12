@@ -8,14 +8,20 @@ import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import header.HeaderParser;
+import time.TimeKeeper;
+
 public class DatagramSender implements Runnable {
 
 	private InetAddress address;
 	private int port;
 	private BlockingQueue<DatagramPacket> queue;
 	private DatagramSocket socket;
+	private TimeKeeper keeper;
 
-	public DatagramSender(DatagramSocket socketArg) {
+	private HeaderParser parser;
+
+	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
 		port = 8888;
 		try {
 			address = InetAddress.getByName("127.0.0.1");
@@ -25,6 +31,8 @@ public class DatagramSender implements Runnable {
 		}
 		queue = new LinkedBlockingQueue<>();
 		socket = socketArg;
+		keeper = keeperArg;
+		parser = new HeaderParser();
 	}
 
 	@Override
@@ -33,6 +41,11 @@ public class DatagramSender implements Runnable {
 			try {
 				DatagramPacket packetToSend = queue.take();
 				socket.send(packetToSend);
+				System.out.println("Sent packet with seqNo " + parser.getSequenceNumber(packetToSend.getData()));
+				System.out.println("This packet has ackNo " + parser.getAcknowledgementNumber(packetToSend.getData()));
+				System.out.println("This packet has windowSize " + parser.getWindowSize(packetToSend.getData()));
+				System.out.println("");
+				keeper.setRetransmissionTimer(packetToSend.getData());
 			} catch (IOException e) {
 				System.out.println("Sender closed");
 				// e.printStackTrace();

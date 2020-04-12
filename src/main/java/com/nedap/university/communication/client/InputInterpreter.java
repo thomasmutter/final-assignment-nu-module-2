@@ -2,35 +2,39 @@ package client;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
+import download.DownloadEstablished;
+import download.DownloadManager;
 import header.HeaderConstructor;
-import managers.DownloadManager;
 import managers.PacketManager;
 import managers.ReadDataManager;
-import managers.UploadManager;
-import remaking.SessionV2;
+import remaking.Session;
+import upload.UploadManager;
 
 public class InputInterpreter {
 
-	private String command;
+	private static final String PATH = "src/main/java/com/nedap/university/resources/";
 	private static List<String> commandList;
+
 	private HeaderConstructor header;
+	private String[] inputArray;
+
+	private int offset;
 
 	public InputInterpreter(String input) {
-		command = input;
+		inputArray = input.split("\\s+");
 		header = new HeaderConstructor();
 		initializeCommandList();
 	}
 
 	public byte[] getDatagramFromInput() {
-		String[] commandArray = command.split("\\s+");
-		byte[] header = formHeader(commandArray[0]);
-		byte[] data = new byte[1];
-
-		if (commandArray.length > 1) {
-			data = commandArray[1].getBytes();
+		byte[] data;
+		if (inputArray.length > 1) {
+			data = inputArray[1].getBytes();
+		} else {
+			data = new byte[1];
 		}
+		byte[] header = formHeader(inputArray[0], data.length);
 
 		byte[] datagram = new byte[header.length + data.length];
 
@@ -39,27 +43,28 @@ public class InputInterpreter {
 		return datagram;
 	}
 
-	public PacketManager getPacketManagerFromInput(SessionV2 session) {
-		switch (getFlagsFromCommand(command.split("\\s+")[0])) {
+	public PacketManager getPacketManagerFromInput(Session session) {
+		switch (getFlagsFromCommand(inputArray[0])) {
 		case HeaderConstructor.UL:
-			return new UploadManager(session);
+			return new UploadManager(session, PATH + inputArray[1]);
 		case HeaderConstructor.DL:
-			return new DownloadManager(session);
+			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
+			manager.setManagerState(new DownloadEstablished(manager, offset));
+			return manager;
 		default:
 			return new ReadDataManager(session);
 		}
 	}
 
-	private byte[] formHeader(String command) {
+	private byte[] formHeader(String command, int payloadSize) {
 		byte flagsToSend = getFlagsFromCommand(command);
-		System.out.println("The flags are: " + flagsToSend);
 		byte status = 0;
-		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = 0;
+		int seqNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
+//		System.out.println("Sending packet with seqNo: " + seqNo);
+		int ackNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
+		offset = ackNo;
 		int checksum = 0;
-		int windowSize = 0;
-		System.out.println("The payload size is: " + windowSize);
+		int windowSize = payloadSize;
 		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
 	}
 

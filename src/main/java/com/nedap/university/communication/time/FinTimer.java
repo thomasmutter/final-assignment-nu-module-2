@@ -2,26 +2,20 @@ package time;
 
 import java.util.TimerTask;
 
-import remaking.SessionV2;
+import remaking.Session;
 
 public class FinTimer extends TimerTask {
 
 	private TimeKeeper keeper;
-	private SessionV2 session;
+	private Session session;
 
-	public FinTimer(TimeKeeper manager, SessionV2 sessionArg) {
+	public FinTimer(TimeKeeper manager, Session sessionArg) {
 		keeper = manager;
 		session = sessionArg;
 	}
 
 	@Override
 	public void run() {
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		System.out.println("-----TIMER EXECUTING-----");
 		if (keeper.getFinTimersSet() == 1) {
 			System.out.println("reached");
@@ -29,7 +23,8 @@ public class FinTimer extends TimerTask {
 		} else {
 			keeper.decrementFinTimers();
 		}
-
+		this.cancel();
+		System.out.println(Thread.currentThread().getName() + " is done");
 	}
 
 }

@@ -5,16 +5,19 @@ import java.util.Random;
 
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.SessionV2;
+import remaking.Session;
+import sessionTermination.SenderTermination;
+import sessionTermination.Terminator;
+import time.TimeKeeper;
 
 public class ListManager implements PacketManager {
 
-	private SessionV2 session;
+	private Session session;
 	private HeaderConstructor headerConstructor;
 	private HeaderParser parser;
 	private static final String PATH = "src/main/java/com/nedap/university/resources";
 
-	public ListManager(SessionV2 sessionArg) {
+	public ListManager(Session sessionArg) {
 		session = sessionArg;
 		headerConstructor = new HeaderConstructor();
 		parser = new HeaderParser();
@@ -25,20 +28,19 @@ public class ListManager implements PacketManager {
 		if (parser.getStatus(parser.getHeader(data)) != HeaderConstructor.ACK) {
 			sendList(data);
 		} else {
-			session.finalizeSession();
+			shutdownSession(parser.getSequenceNumber(data), parser.getAcknowledgementNumber(data));
 		}
 	}
 
 	private void sendList(byte[] data) {
-		byte[] header = headerToSend(parser.getHeader(data));
 		byte[] payload = getBytesFromPath();
+		byte[] header = headerToSend(parser.getHeader(data), payload.length);
 
 		byte[] datagram = new byte[header.length + payload.length];
 
 		System.arraycopy(header, 0, datagram, 0, header.length);
 		System.arraycopy(payload, 0, datagram, header.length, payload.length);
 
-//		System.out.println("Offering list to send queue");
 		session.addToSendQueue(datagram);
 	}
 
@@ -52,16 +54,22 @@ public class ListManager implements PacketManager {
 		return listString.getBytes();
 	}
 
-	public byte[] headerToSend(byte[] oldHeader) {
+	public byte[] headerToSend(byte[] oldHeader, int payloadSize) {
 		byte flags = HeaderConstructor.LS;
 		byte status = HeaderConstructor.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-//		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = parser.getSequenceNumber(oldHeader) + parser.getWindowSize(oldHeader);
+		int ackNo = parser.getSequenceNumber(oldHeader);
 		int checksum = 0;
-		int windowSize = oldHeader.length;
-//		System.out.println("The payload size is: " + windowSize);
+		int windowSize = payloadSize;
 		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+	}
+
+	private void shutdownSession(int seqNo, int ackNo) {
+		CleanUpManager cleanUp = new CleanUpManager(session);
+		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
+		session.setManager(cleanUp);
+		cleanUp.setTerminator(terminator);
+		terminator.terminateSession(seqNo, ackNo);
 	}
 
 }

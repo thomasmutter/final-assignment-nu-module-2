@@ -5,7 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
-import remaking.SessionV2;
+import remaking.Session;
 
 public class Server {
 
@@ -15,7 +15,7 @@ public class Server {
 		socket = new DatagramSocket(port);
 	}
 
-	private void handleRequest(SessionV2 session) throws IOException {
+	private void handleRequest(Session session) throws IOException {
 		DatagramPacket request = receiveRequest();
 		System.out.println("Request received");
 		RequestHandler handler = new RequestHandler();
@@ -32,9 +32,9 @@ public class Server {
 	}
 
 	private void startSessionFromRequest() throws IOException {
-		while (true) {
-			handleRequest(new SessionV2());
-		}
+//		while (true) {
+		handleRequest(new Session());
+//		}
 	}
 
 	public static void main(String[] arg) {
