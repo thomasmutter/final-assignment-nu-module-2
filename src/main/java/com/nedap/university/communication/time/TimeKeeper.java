@@ -1,5 +1,6 @@
 package time;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -19,7 +20,7 @@ public class TimeKeeper {
 
 	public TimeKeeper(Session sessionArg) {
 		session = sessionArg;
-		unAckedPackets = new HashMap<>();
+		unAckedPackets = Collections.synchronizedMap(new HashMap<>());
 		parser = new HeaderParser();
 		initiateRetransmissionTimer();
 	}

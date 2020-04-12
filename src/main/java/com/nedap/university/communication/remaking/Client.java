@@ -34,8 +34,9 @@ public class Client {
 			e.printStackTrace();
 		}
 		InputInterpreter input = new InputInterpreter(command);
+		byte[] inputDatagram = input.getDatagramFromInput();
 		session.setManager(input.getPacketManagerFromInput(session));
-		session.addToSendQueue(input.getDatagramFromInput());
+		session.addToSendQueue(inputDatagram);
 
 	}
 

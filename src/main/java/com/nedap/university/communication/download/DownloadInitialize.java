@@ -1,7 +1,5 @@
 package download;
 
-import java.util.Random;
-
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -19,15 +17,14 @@ public class DownloadInitialize implements ManagerState {
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = parser.getAcknowledgementNumber(incomingDatagram);
-		int ackNo = new Random().nextInt(Integer.MAX_VALUE);
+		int ackNo = parser.getSequenceNumber(incomingDatagram);
 		byte[] ackDatagram = manager.formHeader(seqNo, ackNo, HeaderConstructor.ACKSIZE);
 		manager.processOutgoingData(ackDatagram);
-		nextState();
+		nextState(ackNo);
 	}
 
-	@Override
-	public void nextState() {
-		manager.setManagerState(new DownloadEstablished(manager));
+	private void nextState(int offset) {
+		manager.setManagerState(new DownloadEstablished(manager, offset));
 	}
 
 }

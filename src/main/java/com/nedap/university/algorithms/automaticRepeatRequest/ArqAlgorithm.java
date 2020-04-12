@@ -8,6 +8,4 @@ public interface ArqAlgorithm {
 
 	int getAckNo();
 
-	int getWindowSize();
-
 }

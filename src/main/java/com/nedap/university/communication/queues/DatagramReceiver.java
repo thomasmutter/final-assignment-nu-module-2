@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Random;
 
+import header.HeaderParser;
 import remaking.Session;
 import time.TimeKeeper;
 
@@ -13,11 +14,13 @@ public class DatagramReceiver implements Runnable {
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
 	private Session session;
+	private HeaderParser parser;
 
 	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
 		keeper = keeperArg;
+		parser = new HeaderParser();
 	}
 
 	@Override
@@ -29,17 +32,20 @@ public class DatagramReceiver implements Runnable {
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
-				if (random.nextInt(100) < 10) {
+				if (random.nextInt(100) < 50) {
+					System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
+					System.out.println(
+							"Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
 					keeper.processIncomingAck(receivedPacket.getData());
 					session.giveDatagramToManager(receivedPacket);
 				} else {
-					System.out.println("Packet lost");
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					System.out.println("----- PACKET LOSS ------");
+//					try {
+//						Thread.sleep(2000);
+//					} catch (InterruptedException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
 				}
 			}
 		} catch (IOException e) {

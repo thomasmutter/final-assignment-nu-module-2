@@ -2,15 +2,14 @@ package client;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import download.DownloadEstablished;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import managers.PacketManager;
 import managers.ReadDataManager;
-import managers.UploadManager;
 import remaking.Session;
+import upload.UploadManager;
 
 public class InputInterpreter {
 
@@ -19,6 +18,8 @@ public class InputInterpreter {
 
 	private HeaderConstructor header;
 	private String[] inputArray;
+
+	private int offset;
 
 	public InputInterpreter(String input) {
 		inputArray = input.split("\\s+");
@@ -48,7 +49,7 @@ public class InputInterpreter {
 			return new UploadManager(session, PATH + inputArray[1]);
 		case HeaderConstructor.DL:
 			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
-			manager.setManagerState(new DownloadEstablished(manager));
+			manager.setManagerState(new DownloadEstablished(manager, offset));
 			return manager;
 		default:
 			return new ReadDataManager(session);
@@ -58,9 +59,10 @@ public class InputInterpreter {
 	private byte[] formHeader(String command, int payloadSize) {
 		byte flagsToSend = getFlagsFromCommand(command);
 		byte status = 0;
-		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
+		int seqNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = 0;
+		int ackNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
+		offset = ackNo;
 		int checksum = 0;
 		int windowSize = payloadSize;
 		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);

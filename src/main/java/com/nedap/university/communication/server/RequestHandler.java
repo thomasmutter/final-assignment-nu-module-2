@@ -8,8 +8,8 @@ import header.HeaderParser;
 import managers.ListManager;
 import managers.PacketManager;
 import managers.RemoveManager;
-import managers.UploadManager;
 import remaking.Session;
+import upload.UploadManager;
 
 public class RequestHandler {
 
