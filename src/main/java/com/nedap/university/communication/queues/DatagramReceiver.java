@@ -28,7 +28,7 @@ public class DatagramReceiver implements Runnable {
 		try {
 			DatagramPacket firstPacket = receiveDatagram();
 			keeper.processIncomingAck(firstPacket.getData());
-			session.startUp(firstPacket);
+			session.setUpContact(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();

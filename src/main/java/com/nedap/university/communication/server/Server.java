@@ -5,9 +5,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+import communicationProtocols.Protocol;
 import remaking.Session;
 
-public class Server {
+public class Server implements Runnable {
 
 	private DatagramSocket socket;
 
@@ -15,12 +16,12 @@ public class Server {
 		socket = new DatagramSocket(port);
 	}
 
-	private void handleRequest(Session session) throws IOException {
-		DatagramPacket request = receiveRequest();
-		System.out.println("Request received");
+	private void handleRequest(DatagramPacket request) throws IOException {
+		Session session = new Session();
 		RequestHandler handler = new RequestHandler();
 		session.setManager(handler.getPacketManagerFromRequest(request.getData(), session));
-		session.startUp(request);
+		session.setUpContact(request);
+		session.giveDatagramToManager(request);
 	}
 
 	private DatagramPacket receiveRequest() throws IOException {
@@ -31,37 +32,47 @@ public class Server {
 		return sessionRequest;
 	}
 
-	private void startSessionFromRequest() throws IOException {
-//		while (true) {
-		handleRequest(new Session());
-//		}
+	private void listenForContact() throws IOException {
+
+		DatagramPacket contact = receiveRequest();
+		if (contact.getLength() == 1) {
+			System.out.println("Contact request received");
+			giveSignOfLife(contact);
+		} else {
+			handleRequest(contact);
+		}
+	}
+
+	private void giveSignOfLife(DatagramPacket contactRequest) throws IOException {
+		byte[] datagramSign = new byte[1];
+		DatagramPacket signOfLife = new DatagramPacket(datagramSign, datagramSign.length, contactRequest.getAddress(),
+				contactRequest.getPort());
+		socket.send(signOfLife);
 	}
 
 	public static void main(String[] arg) {
-		if (arg.length < 1) {
-			System.out.println("Not enough arguments provided.");
-			System.out.println("Syntax: FileTransferServer <port>");
-			return;
-		}
-
-		int port;
-		try {
-			port = Integer.parseInt(arg[0]);
-		} catch (NumberFormatException n) {
-			System.out.println("The provided argument is not an integer");
-			return;
-		}
+		int port = Protocol.PORT;
 
 		try {
 			Server server = new Server(port);
-			server.startSessionFromRequest();
+			new Thread(server).start();
 		} catch (SocketException s) {
 			System.out.println("Socket error: " + s.getMessage());
 			s.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public void run() {
+		while (true) {
+			try {
+				listenForContact();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 	}
 
 }

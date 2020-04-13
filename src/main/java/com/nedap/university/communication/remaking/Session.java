@@ -28,9 +28,8 @@ public class Session {
 		new Thread(sender).start();
 	}
 
-	public void startUp(DatagramPacket datagram) {
+	public void setUpContact(DatagramPacket datagram) {
 		sender.setContactInformation(datagram.getPort(), datagram.getAddress());
-		giveDatagramToManager(datagram);
 	}
 
 	public void addToSendQueue(byte[] packet) {
@@ -41,12 +40,6 @@ public class Session {
 	public void setManager(PacketManager managerArg) {
 		manager = managerArg;
 	}
-
-//	public void finalizeSession(byte[] data) {
-//		// System.out.println("Finalization steps requested by packet manager");
-//		manager = new CleanUpManager(this);
-//		((CleanUpManager) manager).sendFin(HeaderConstructor.FIN, data);
-//	}
 
 	public void giveDatagramToManager(DatagramPacket datagram) {
 		byte[] data = datagram.getData();
