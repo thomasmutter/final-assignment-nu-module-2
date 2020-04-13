@@ -67,7 +67,7 @@ public class HeaderConstructor {
 		return inputAsBytes;
 	}
 
-	private byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
+	public byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
 		for (int i = 0; i < inputArray.length; i++) {
 			header[startIndex] = (byte) inputArray[i];
 			startIndex++;
