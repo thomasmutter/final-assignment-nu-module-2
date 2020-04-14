@@ -5,9 +5,9 @@ import java.io.File;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import managers.ListManager;
-import managers.PacketManager;
-import managers.RemoveManager;
+import otherCommands.ListManager;
+import otherCommands.PacketManager;
+import otherCommands.RemoveManager;
 import remaking.Session;
 import upload.UploadManager;
 
@@ -26,10 +26,10 @@ public class RequestHandler {
 			return new DownloadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
 		case HeaderConstructor.DL:
 			return new UploadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
-		case HeaderConstructor.RM:
-			return new RemoveManager(session);
-		default:
+		case HeaderConstructor.LS:
 			return new ListManager(session);
+		default:
+			return new RemoveManager(session);
 		}
 	}
 

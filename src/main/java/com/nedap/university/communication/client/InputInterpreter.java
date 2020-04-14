@@ -6,8 +6,8 @@ import java.util.List;
 import download.DownloadEstablished;
 import download.DownloadManager;
 import header.HeaderConstructor;
-import managers.PacketManager;
-import managers.ReadDataManager;
+import otherCommands.PacketManager;
+import otherCommands.ReadDataManager;
 import remaking.Session;
 import upload.UploadManager;
 

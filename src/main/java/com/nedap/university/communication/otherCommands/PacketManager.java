@@ -1,4 +1,4 @@
-package managers;
+package otherCommands;
 
 public interface PacketManager {
 

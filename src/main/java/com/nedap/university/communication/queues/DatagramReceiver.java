@@ -32,7 +32,7 @@ public class DatagramReceiver implements Runnable {
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
-				if (random.nextInt(100) < 10) {
+				if (random.nextInt(100) < 100) {
 					System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
 					System.out.println(
 							"Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));

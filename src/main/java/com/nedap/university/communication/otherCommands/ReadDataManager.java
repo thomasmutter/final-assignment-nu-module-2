@@ -1,4 +1,4 @@
-package managers;
+package otherCommands;
 
 import header.HeaderConstructor;
 import header.HeaderParser;
@@ -22,14 +22,19 @@ public class ReadDataManager implements PacketManager {
 	@Override
 	public void processIncomingData(byte[] data) {
 		if (parser.getCommand(data) == HeaderConstructor.RP) {
-			session.setManager(new UploadManager(session, getDataAsString(data)));
+			System.out.println(getDataAsString(data).length());
+			UploadManager upload = new UploadManager(session,
+					"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
+			session.setManager(upload);
+			System.out.println("GOING TO UPLOAD");
+			upload.processIncomingData(data);
 		} else if (parser.getStatus(data) == HeaderConstructor.FIN) {
 			shutdownSession(parser.getSequenceNumber(data), parser.getAcknowledgementNumber(data));
 			return;
 		} else {
 			System.out.println(getDataAsString(data));
+			sendAck(data);
 		}
-		sendAck(data);
 	}
 
 	private void sendAck(byte[] data) {

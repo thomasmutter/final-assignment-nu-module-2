@@ -1,4 +1,4 @@
-package managers;
+package otherCommands;
 
 import java.io.File;
 import java.util.Random;

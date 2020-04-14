@@ -1,4 +1,4 @@
-package managers;
+package otherCommands;
 
 import header.HeaderConstructor;
 import header.HeaderParser;

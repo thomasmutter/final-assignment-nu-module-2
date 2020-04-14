@@ -26,7 +26,7 @@ public class OwnTimer implements Runnable {
 			if (!timerMap.isEmpty()) {
 				synchronized (timerMap) {
 					long time = timerMap.firstKey();
-					if (System.currentTimeMillis() - time > 1000) {
+					if (System.currentTimeMillis() - time > 2000) {
 						keeper.retransmit(timerMap.get(time));
 						timerMap.remove(time);
 					}

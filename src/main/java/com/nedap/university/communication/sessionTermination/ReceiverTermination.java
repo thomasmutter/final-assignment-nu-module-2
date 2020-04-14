@@ -1,7 +1,7 @@
 package sessionTermination;
 
 import header.HeaderConstructor;
-import managers.CleanUpManager;
+import otherCommands.CleanUpManager;
 
 public class ReceiverTermination implements Terminator {
 

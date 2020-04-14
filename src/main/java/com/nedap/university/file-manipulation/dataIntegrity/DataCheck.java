@@ -37,7 +37,9 @@ public class DataCheck {
 
 	public int calculateRemainder(byte[] file) {
 		file = appendArrayToData(file, new byte[] { 0, 0 });
-		totalBitPointer = Integer.numberOfLeadingZeros(file[0]) - 24;
+		// totalBitPointer = Integer.numberOfLeadingZeros(file[0]) - 24;
+//		System.out.println(Integer.toBinaryString(file[0]));
+//		System.out.println(totalBitPointer);
 		int remainder = shiftByBits(0, file);
 		while (totalBitPointer < file.length * 8) {
 			remainder ^= Protocol.CRCPOLYNOMIAL;
@@ -76,7 +78,9 @@ public class DataCheck {
 		ConversionHandler handler = new ConversionHandler();
 		DataCheck checksum = new DataCheck();
 		byte[] file = handler.readFileToBytes("medium.pdf");
+		file[0] = 1;
 		System.out.println(checksum.calculateRemainder(file));
+		System.out.println(checksum.calculateRemainder(checksum.appendCRC(file)));
 	}
 
 }

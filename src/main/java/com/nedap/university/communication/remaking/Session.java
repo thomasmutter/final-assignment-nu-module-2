@@ -4,7 +4,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
-import managers.PacketManager;
+import otherCommands.PacketManager;
 import queues.DatagramReceiver;
 import queues.DatagramSender;
 import time.TimeKeeper;
@@ -42,12 +42,21 @@ public class Session {
 	}
 
 	public void giveDatagramToManager(DatagramPacket datagram) {
-		byte[] data = datagram.getData();
+		byte[] data = stripBufferRemainder(datagram);
 		manager.processIncomingData(data);
 	}
 
 	public void shutdown() {
 		sender.close();
+	}
+
+	private byte[] stripBufferRemainder(DatagramPacket datagram) {
+		byte[] buffer = datagram.getData();
+		byte[] data = new byte[datagram.getLength()];
+		for (int i = 0; i < data.length; i++) {
+			data[i] = buffer[i];
+		}
+		return data;
 	}
 
 }
