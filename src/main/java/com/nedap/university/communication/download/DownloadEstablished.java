@@ -32,15 +32,20 @@ public class DownloadEstablished implements ManagerState {
 			System.out.println("SENDING PAUSE");
 			manager.processOutgoingData(Protocol.PAUSE);
 			nextState();
-		} else if (parser.getStatus(incomingDatagram) != HeaderConstructor.FIN) {
+		} else if (!containsFin(incomingDatagram)) {
 			actAccordingToWindow(seqNo, ackNo, payload, data);
 		} else {
-			manager.shutdownSession(seqNo, ackNo);
+			manager.shutdownSession(ackNo, seqNo);
 		}
 	}
 
 	public byte[] getLastAck() {
 		return lastAckSent;
+	}
+
+	private boolean containsFin(byte[] data) {
+		return parser.getStatus(data) == HeaderConstructor.FIN
+				|| parser.getStatus(data) == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK);
 	}
 
 	private void nextState() {
@@ -59,8 +64,8 @@ public class DownloadEstablished implements ManagerState {
 			lastAckSent = composeNewAck(ackNo);
 			manager.processOutgoingData(lastAckSent);
 		} else {
-			System.out.println("The sequence number is: " + seqNo);
-			System.out.println("The ack number is: " + ackNo);
+			// System.out.println("The sequence number is: " + seqNo);
+			// System.out.println("The ack number is: " + ackNo);
 			System.out.println("Packet dropped, not in window");
 		}
 	}

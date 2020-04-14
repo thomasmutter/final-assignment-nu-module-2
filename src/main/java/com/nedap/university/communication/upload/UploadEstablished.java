@@ -36,10 +36,10 @@ public class UploadEstablished implements ManagerState {
 
 //		System.out.println("The filepointer is at: " + filePointer);
 
-		if (filePointer != fileLength) {
+		if (ackNo != fileLength) {
 			sendOrDiscardDatagram(seqNo, ackNo);
 		} else {
-			manager.shutdownSession(seqNo, ackNo);
+			manager.shutdownSession(ackNo, seqNo);
 		}
 
 	}

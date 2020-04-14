@@ -53,6 +53,7 @@ public class DownloadManager implements PacketManager {
 
 	private void finalizeFileTransfer() {
 		ConversionHandler converter = new ConversionHandler();
+		System.out.println(fileAsBytes.length);
 		converter.writeBytesToFile(fileAsBytes, path);
 	}
 
@@ -66,7 +67,7 @@ public class DownloadManager implements PacketManager {
 		Terminator terminator = new ReceiverTermination(cleanUp);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
 	}
 
 }

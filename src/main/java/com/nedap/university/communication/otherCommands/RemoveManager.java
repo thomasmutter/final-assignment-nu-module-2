@@ -99,7 +99,7 @@ public class RemoveManager implements PacketManager {
 		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
 	}
 
 }

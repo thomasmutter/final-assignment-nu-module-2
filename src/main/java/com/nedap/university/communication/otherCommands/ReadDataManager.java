@@ -70,7 +70,7 @@ public class ReadDataManager implements PacketManager {
 		Terminator terminator = new ReceiverTermination(cleanUp);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
 	}
 
 }

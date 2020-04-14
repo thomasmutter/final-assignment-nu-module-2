@@ -20,9 +20,10 @@ public class CleanUpManager implements PacketManager {
 
 	@Override
 	public void processIncomingData(byte[] data) {
+		byte status = parser.getStatus(data);
 		int seqNo = parser.getSequenceNumber(data);
 		int ackNo = parser.getAcknowledgementNumber(data);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(status, ackNo, seqNo);
 	}
 
 	public void sendFin(byte statusArg, int seqNo, int ackNo) {
@@ -45,7 +46,7 @@ public class CleanUpManager implements PacketManager {
 	private byte[] formHeader(byte statusArg, int seqNoArg, int ackNoArg) {
 		byte flags = 0;
 		byte status = statusArg;
-		int seqNo = seqNoArg;
+		int seqNo = seqNoArg + HeaderConstructor.ACKSIZE;
 		int ackNo = ackNoArg;
 		int checksum = 0;
 		int windowSize = 1;

@@ -34,11 +34,11 @@ public class DatagramReceiver implements Runnable {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
 				if (random.nextInt(100) < 10) {
-//					printInformation(receivedPacket);
+					// printInformation(receivedPacket);
 					keeper.processIncomingAck(receivedPacket.getData());
 					session.giveDatagramToManager(receivedPacket);
 				} else {
-					System.out.println("----- PACKET LOSS ------");
+					// System.out.println("----- PACKET LOSS ------");
 //					try {
 //						Thread.sleep(2000);
 //					} catch (InterruptedException e) {

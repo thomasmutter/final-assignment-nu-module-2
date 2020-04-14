@@ -2,6 +2,6 @@ package sessionTermination;
 
 public interface Terminator {
 
-	void terminateSession(int seqNo, int ackNo);
+	void terminateSession(byte status, int seqNo, int ackNo);
 
 }

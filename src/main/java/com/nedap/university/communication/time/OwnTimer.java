@@ -7,22 +7,20 @@ import java.util.TreeMap;
 
 public class OwnTimer implements Runnable {
 
-	private SortedMap<Long, Integer> map;
 	private SortedMap<Long, Integer> timerMap;
 	private TimeKeeper keeper;
 
 	private static final long SHORTSLEEP = 10;
-	private static final long LONGSLEEP = 1000;
+	private static final long LONGSLEEP = 10;
 
 	public OwnTimer(TimeKeeper keeperArg) {
-		map = new TreeMap<>();
+		timerMap = Collections.synchronizedSortedMap(new TreeMap<>());
 		keeper = keeperArg;
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			timerMap = Collections.synchronizedSortedMap(map);
 			synchronized (timerMap) {
 				if (!timerMap.isEmpty()) {
 					long time = timerMap.firstKey();
