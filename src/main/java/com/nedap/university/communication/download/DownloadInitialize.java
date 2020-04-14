@@ -18,7 +18,7 @@ public class DownloadInitialize implements ManagerState {
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = parser.getAcknowledgementNumber(incomingDatagram);
 		int ackNo = parser.getSequenceNumber(incomingDatagram);
-		byte[] ackDatagram = manager.formHeader(seqNo, ackNo, HeaderConstructor.ACKSIZE);
+		byte[] ackDatagram = manager.formHeader(HeaderConstructor.DL, seqNo, ackNo, HeaderConstructor.ACKSIZE);
 		manager.processOutgoingData(ackDatagram);
 		nextState(ackNo);
 	}

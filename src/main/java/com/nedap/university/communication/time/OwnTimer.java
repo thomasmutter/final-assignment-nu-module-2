@@ -23,10 +23,10 @@ public class OwnTimer implements Runnable {
 	public void run() {
 		while (true) {
 			timerMap = Collections.synchronizedSortedMap(map);
-			if (!timerMap.isEmpty()) {
-				synchronized (timerMap) {
+			synchronized (timerMap) {
+				if (!timerMap.isEmpty()) {
 					long time = timerMap.firstKey();
-					if (System.currentTimeMillis() - time > 2000) {
+					if (System.currentTimeMillis() - time > LONGSLEEP) {
 						keeper.retransmit(timerMap.get(time));
 						timerMap.remove(time);
 					}
@@ -60,17 +60,18 @@ public class OwnTimer implements Runnable {
 	private long getSleepTime() {
 		long goingToSleepTime = System.currentTimeMillis();
 		long sleepTime = 0;
-		if (!timerMap.isEmpty()) {
-			synchronized (timerMap) {
+		synchronized (timerMap) {
+			if (!timerMap.isEmpty()) {
 				sleepTime = timerMap.firstKey() - goingToSleepTime;
-			}
-			if (sleepTime > 0) {
-				return sleepTime;
+
+				if (sleepTime > 0) {
+					return sleepTime;
+				} else {
+					return SHORTSLEEP;
+				}
 			} else {
-				return SHORTSLEEP;
+				return LONGSLEEP;
 			}
-		} else {
-			return LONGSLEEP;
 		}
 	}
 

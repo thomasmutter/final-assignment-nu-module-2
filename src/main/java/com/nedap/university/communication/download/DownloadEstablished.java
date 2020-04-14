@@ -1,5 +1,6 @@
 package download;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -9,6 +10,8 @@ public class DownloadEstablished implements ManagerState {
 	private DownloadManager manager;
 	private DownloadWindow algorithm;
 	private HeaderParser parser;
+
+	private byte[] lastAckSent;
 
 	public DownloadEstablished(DownloadManager managerArg, int offset) {
 		manager = managerArg;
@@ -22,22 +25,39 @@ public class DownloadEstablished implements ManagerState {
 		int ackNo = parser.getAcknowledgementNumber(incomingDatagram);
 		int payload = parser.getWindowSize(incomingDatagram);
 		byte[] data = parser.getData(incomingDatagram);
-		if (parser.getStatus(incomingDatagram) != HeaderConstructor.FIN) {
+//		System.out.println("The received command is " + parser.getCommand(incomingDatagram));
+//		System.out.println(HeaderConstructor.P);
+//		System.out.println(HeaderConstructor.P == parser.getCommand(data));
+		if (parser.getCommand(incomingDatagram) == HeaderConstructor.P) {
+			System.out.println("SENDING PAUSE");
+			manager.processOutgoingData(Protocol.PAUSE);
+			nextState();
+		} else if (parser.getStatus(incomingDatagram) != HeaderConstructor.FIN) {
 			actAccordingToWindow(seqNo, ackNo, payload, data);
 		} else {
 			manager.shutdownSession(seqNo, ackNo);
 		}
 	}
 
+	public byte[] getLastAck() {
+		return lastAckSent;
+	}
+
+	private void nextState() {
+		manager.setManagerState(new DownloadPaused(manager, this));
+	}
+
 	private byte[] composeNewAck(int incomingAck) {
-		return manager.formHeader(incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(), 1);
+		return manager.formHeader(HeaderConstructor.DL, incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(),
+				1);
 	}
 
 	private void actAccordingToWindow(int seqNo, int ackNo, int payload, byte[] data) {
 		if (algorithm.datagramInWindow(seqNo, payload)) {
 			algorithm.moveDatagramWindow(seqNo);
 			manager.writeToByteArray(data);
-			manager.processOutgoingData(composeNewAck(ackNo));
+			lastAckSent = composeNewAck(ackNo);
+			manager.processOutgoingData(lastAckSent);
 		} else {
 			System.out.println("The sequence number is: " + seqNo);
 			System.out.println("The ack number is: " + ackNo);

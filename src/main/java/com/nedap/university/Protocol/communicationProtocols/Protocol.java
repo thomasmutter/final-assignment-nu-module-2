@@ -1,5 +1,7 @@
 package communicationProtocols;
 
+import header.HeaderConstructor;
+
 public class Protocol {
 
 	public static final int PORT = 8887;
@@ -13,5 +15,11 @@ public class Protocol {
 	 * Source: https://users.ece.cmu.edu/~koopman/crc/
 	 */
 	public static final int CRCPOLYNOMIAL = 0x8FDC;
+
+	/**
+	 * Pause and resume initialization messages
+	 */
+	public static final byte[] PAUSE = new byte[] { HeaderConstructor.P };
+	public static final byte[] RESUME = new byte[] { HeaderConstructor.R };
 
 }

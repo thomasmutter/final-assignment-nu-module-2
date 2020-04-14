@@ -17,9 +17,6 @@ public class DownloadWindow {
 	}
 
 	public boolean datagramInWindow(int incomingSeqNo, int payloadSize) {
-		int oke = incomingSeqNo - payloadSize;
-		System.out.println(oke);
-		System.out.println(lastByteAcked);
 		return incomingSeqNo - payloadSize == lastByteAcked;
 	}
 

@@ -42,8 +42,8 @@ public class DownloadManager implements PacketManager {
 		System.arraycopy(data, 0, fileAsBytes, oldLength, data.length);
 	}
 
-	public byte[] formHeader(int seqNo, int ackNo, int payloadSize) {
-		byte flags = HeaderConstructor.DL;
+	public byte[] formHeader(byte command, int seqNo, int ackNo, int payloadSize) {
+		byte flags = command;
 		byte status = HeaderConstructor.ACK;
 
 		int checksum = 0;

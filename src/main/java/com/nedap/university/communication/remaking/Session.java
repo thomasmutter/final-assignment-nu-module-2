@@ -2,8 +2,10 @@ package remaking;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 
+import header.HeaderConstructor;
 import otherCommands.PacketManager;
 import queues.DatagramReceiver;
 import queues.DatagramSender;
@@ -28,8 +30,8 @@ public class Session {
 		new Thread(sender).start();
 	}
 
-	public void setUpContact(DatagramPacket datagram) {
-		sender.setContactInformation(datagram.getPort(), datagram.getAddress());
+	public void setUpContact(InetAddress address, int port) {
+		sender.setContactInformation(port, address);
 	}
 
 	public void addToSendQueue(byte[] packet) {
@@ -44,6 +46,16 @@ public class Session {
 	public void giveDatagramToManager(DatagramPacket datagram) {
 		byte[] data = stripBufferRemainder(datagram);
 		manager.processIncomingData(data);
+	}
+
+	public void pause() {
+		byte[] pauseDatagram = new byte[] { HeaderConstructor.P };
+		addToSendQueue(pauseDatagram);
+	}
+
+	public void resume() {
+		byte[] resumeDatagram = new byte[] { HeaderConstructor.R };
+		addToSendQueue(resumeDatagram);
 	}
 
 	public void shutdown() {

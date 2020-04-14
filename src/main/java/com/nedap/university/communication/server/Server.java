@@ -20,7 +20,7 @@ public class Server implements Runnable {
 		Session session = new Session();
 		RequestHandler handler = new RequestHandler();
 		session.setManager(handler.getPacketManagerFromRequest(request.getData(), session));
-		session.setUpContact(request);
+		session.setUpContact(request.getAddress(), request.getPort());
 		session.giveDatagramToManager(request);
 	}
 

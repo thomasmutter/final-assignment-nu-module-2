@@ -18,12 +18,14 @@ public class InputInterpreter {
 
 	private HeaderConstructor header;
 	private String[] inputArray;
+	private Client client;
 
 	private int offset;
 
-	public InputInterpreter(String input) {
+	public InputInterpreter(String input, Client clientArg) {
 		inputArray = input.split("\\s+");
 		header = new HeaderConstructor();
+		client = clientArg;
 		initializeCommandList();
 	}
 
@@ -46,10 +48,12 @@ public class InputInterpreter {
 	public PacketManager getPacketManagerFromInput(Session session) {
 		switch (getFlagsFromCommand(inputArray[0])) {
 		case HeaderConstructor.UL:
+			client.addSessionToMap(inputArray[1], session);
 			return new UploadManager(session, PATH + inputArray[1]);
 		case HeaderConstructor.DL:
 			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
 			manager.setManagerState(new DownloadEstablished(manager, offset));
+			client.addSessionToMap(inputArray[1], session);
 			return manager;
 		default:
 			return new ReadDataManager(session);

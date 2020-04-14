@@ -6,22 +6,39 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 
-import clientTUI.ClientTUI;
 import communicationProtocols.Protocol;
 import remaking.Session;
 
 public class Client {
 
-	private ClientTUI tui;
 	private DatagramSocket socket;
+	private Map<String, Session> sessionMap;
 
-	public Client(ClientTUI tuiArg) throws SocketException {
-		tui = tuiArg;
+	private InetAddress serverAddress;
+
+	public Client() throws SocketException {
 		socket = new DatagramSocket();
+		sessionMap = new HashMap<>();
 	}
 
-	private DatagramPacket lookForServer() throws IOException {
+	public void addSessionToMap(String fileName, Session session) {
+		sessionMap.put(fileName, session);
+	}
+
+	public void pauseSession(String fileName) {
+		Session sessionToPause = sessionMap.get(fileName);
+		sessionToPause.pause();
+	}
+
+	public void resumeSession(String fileName) {
+		Session sessionToResume = sessionMap.get(fileName);
+		sessionToResume.resume();
+	}
+
+	private void lookForServer() throws IOException {
 		socketConfig();
 		sendBroadcast();
 		byte[] buffer = new byte[2];
@@ -36,7 +53,10 @@ public class Client {
 				System.out.println(signOfLife.getLength());
 			}
 		}
-		return signOfLife;
+		serverAddress = signOfLife.getAddress();
+		InputListener listener = new InputListener(this);
+		System.out.println("_-----------STARTING NEW LISTNER-----------");
+		new Thread(listener).start();
 	}
 
 	private void socketConfig() throws IOException {
@@ -55,28 +75,27 @@ public class Client {
 
 	}
 
-	private void start(DatagramPacket signOfLife) throws SocketException {
-		String command = tui.getCommand();
+	public void startSession(String command) throws SocketException {
+//		String command = tui.getCommand();
 
 		Session session = null;
 		session = new Session();
 
-		InputInterpreter input = new InputInterpreter(command);
+		InputInterpreter input = new InputInterpreter(command, this);
 		byte[] inputDatagram = input.getDatagramFromInput();
 		session.setManager(input.getPacketManagerFromInput(session));
-		System.out.println("Address: " + signOfLife.getAddress());
-		session.setUpContact(signOfLife);
+		System.out.println("Address: " + serverAddress);
+		session.setUpContact(serverAddress, Protocol.PORT);
 		session.addToSendQueue(inputDatagram);
+		System.out.println("Session has been started up");
 
 	}
 
 	public static void main(String[] args) {
-		ClientTUI tui = new ClientTUI();
-		Client client;
+
 		try {
-			client = new Client(tui);
-			DatagramPacket signOfLife = client.lookForServer();
-			client.start(signOfLife);
+			Client client = new Client();
+			client.lookForServer();
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

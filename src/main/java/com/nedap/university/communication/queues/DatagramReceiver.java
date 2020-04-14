@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Random;
 
+import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
 import time.TimeKeeper;
@@ -28,14 +29,12 @@ public class DatagramReceiver implements Runnable {
 		try {
 			DatagramPacket firstPacket = receiveDatagram();
 			keeper.processIncomingAck(firstPacket.getData());
-			session.setUpContact(firstPacket);
+			session.setUpContact(firstPacket.getAddress(), firstPacket.getPort());
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
-				if (random.nextInt(100) < 100) {
-					System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
-					System.out.println(
-							"Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+				if (random.nextInt(100) < 10) {
+//					printInformation(receivedPacket);
 					keeper.processIncomingAck(receivedPacket.getData());
 					session.giveDatagramToManager(receivedPacket);
 				} else {
@@ -54,11 +53,19 @@ public class DatagramReceiver implements Runnable {
 		System.out.println("Stopped");
 	}
 
+	private void printInformation(DatagramPacket receivedPacket) {
+		if (parser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
+				|| parser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
+			System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
+			System.out.println("Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+		}
+	}
+
 	private DatagramPacket receiveDatagram() throws IOException {
 		byte[] buffer = new byte[512];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
 		socket.receive(incomingDatagram);
-		System.out.println("Receiving succesfull");
+//		System.out.println("Receiving succesfull");
 
 		return incomingDatagram;
 	}
