@@ -5,8 +5,8 @@ import java.util.Arrays;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
-import managers.CleanUpManager;
-import managers.PacketManager;
+import otherCommands.CleanUpManager;
+import otherCommands.PacketManager;
 import remaking.Session;
 import sessionTermination.ReceiverTermination;
 import sessionTermination.Terminator;
@@ -42,9 +42,9 @@ public class DownloadManager implements PacketManager {
 		System.arraycopy(data, 0, fileAsBytes, oldLength, data.length);
 	}
 
-	public byte[] formHeader(int seqNo, int ackNo, int payloadSize) {
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
 		byte flags = HeaderConstructor.DL;
-		byte status = HeaderConstructor.ACK;
+		byte status = statusArg;
 
 		int checksum = 0;
 		int windowSize = payloadSize;
@@ -53,11 +53,16 @@ public class DownloadManager implements PacketManager {
 
 	private void finalizeFileTransfer() {
 		ConversionHandler converter = new ConversionHandler();
+		System.out.println(fileAsBytes.length);
 		converter.writeBytesToFile(fileAsBytes, path);
 	}
 
 	public void setManagerState(ManagerState state) {
 		managerState = state;
+	}
+
+	public void pauseSession(boolean toPause) {
+		session.pauseSender(toPause);
 	}
 
 	public void shutdownSession(int seqNo, int ackNo) {
@@ -66,7 +71,7 @@ public class DownloadManager implements PacketManager {
 		Terminator terminator = new ReceiverTermination(cleanUp);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
 	}
 
 }

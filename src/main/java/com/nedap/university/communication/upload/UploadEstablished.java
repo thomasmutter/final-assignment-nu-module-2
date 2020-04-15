@@ -1,6 +1,5 @@
 package upload;
 
-import automaticRepeatRequest.UploadWindow;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -13,6 +12,9 @@ public class UploadEstablished implements ManagerState {
 	private HeaderParser parser;
 	private UploadWindow window;
 
+	private byte[] headerToSend;
+	private byte[] dataToSend;
+
 	public UploadEstablished(UploadManager managerArg, int fileLengthArg, UploadWindow windowArg) {
 		manager = managerArg;
 		fileLength = fileLengthArg;
@@ -22,25 +24,35 @@ public class UploadEstablished implements ManagerState {
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
+		if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
+			nextState(incomingDatagram);
+			return;
+		}
+
 		int seqNo = parser.getSequenceNumber(incomingDatagram);
 		int ackNo = parser.getAcknowledgementNumber(incomingDatagram);
 
-		System.out.println("The length of the file is: " + fileLength);
-		System.out.println("THe filepointer is at: " + filePointer);
+//		System.out.println("The filepointer is at: " + filePointer);
 
-//		try {
-//			Thread.sleep(3000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-
-		if (filePointer != fileLength) {
+		if (ackNo != fileLength) {
 			sendOrDiscardDatagram(seqNo, ackNo);
 		} else {
-			manager.shutdownSession(seqNo, ackNo);
+			manager.shutdownSession(ackNo, seqNo);
 		}
 
+	}
+
+	public byte[] getLastHeader() {
+		return headerToSend;
+	}
+
+	public byte[] getLastData() {
+		return dataToSend;
+	}
+
+	private void nextState(byte[] incomingDatagram) {
+		manager.setManagerState(new UploadPaused(manager, this));
+		manager.processIncomingData(incomingDatagram);
 	}
 
 	private void sendOrDiscardDatagram(int seqNo, int ackNo) {
@@ -53,10 +65,10 @@ public class UploadEstablished implements ManagerState {
 	private void sendDatagramsInWindow(int numberOfPacketsToSend, int ackToSend, int oldSeqNo) {
 		int payloadSize = computePayloadSize();
 		int seqNo = oldSeqNo + payloadSize;
-		byte[] data = manager.getSegmentFromFile(payloadSize, filePointer);
+		dataToSend = manager.getSegmentFromFile(payloadSize, filePointer);
 		filePointer += payloadSize;
-		byte[] header = manager.formHeader(seqNo, ackToSend, payloadSize);
-		manager.processOutgoingData(header, data);
+		headerToSend = manager.formHeader(HeaderConstructor.ACK, seqNo, ackToSend, payloadSize);
+		manager.processOutgoingData(headerToSend, dataToSend);
 	}
 
 	private int computePayloadSize() {

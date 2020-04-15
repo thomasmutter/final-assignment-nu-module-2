@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import header.HeaderConstructor;
 import header.HeaderParser;
 import time.TimeKeeper;
 
@@ -22,13 +22,6 @@ public class DatagramSender implements Runnable {
 	private HeaderParser parser;
 
 	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
-		port = 8888;
-		try {
-			address = InetAddress.getByName("127.0.0.1");
-		} catch (UnknownHostException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
 		queue = new LinkedBlockingQueue<>();
 		socket = socketArg;
 		keeper = keeperArg;
@@ -41,10 +34,9 @@ public class DatagramSender implements Runnable {
 			try {
 				DatagramPacket packetToSend = queue.take();
 				socket.send(packetToSend);
-				System.out.println("Sent packet with seqNo " + parser.getSequenceNumber(packetToSend.getData()));
-				System.out.println("This packet has ackNo " + parser.getAcknowledgementNumber(packetToSend.getData()));
-				System.out.println("This packet has windowSize " + parser.getWindowSize(packetToSend.getData()));
-				System.out.println("");
+//				printInformation(packetToSend);
+				if (parser.getStatus(packetToSend.getData()) == (HeaderConstructor.P ^ HeaderConstructor.ACK))
+					System.out.println("sending packet with status: " + parser.getStatus(packetToSend.getData()));
 				keeper.setRetransmissionTimer(packetToSend.getData());
 			} catch (IOException e) {
 				System.out.println("Sender closed");
@@ -53,6 +45,16 @@ public class DatagramSender implements Runnable {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void printInformation(DatagramPacket receivedPacket) {
+		if (parser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
+				|| parser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
+			System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
+			System.out.println("Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+			System.out.println("This packet has windowSize " + parser.getWindowSize(receivedPacket.getData()));
+			System.out.println("");
 		}
 	}
 
@@ -68,6 +70,10 @@ public class DatagramSender implements Runnable {
 	public void setContactInformation(int portArg, InetAddress addressArg) {
 		port = portArg;
 		address = addressArg;
+	}
+
+	public void toPauseTimer(boolean toPause) {
+		keeper.pauseRetransmissionTimer(toPause);
 	}
 
 	public void close() {

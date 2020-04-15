@@ -10,6 +10,8 @@ public class DownloadEstablished implements ManagerState {
 	private DownloadWindow algorithm;
 	private HeaderParser parser;
 
+	private byte[] lastAckSent;
+
 	public DownloadEstablished(DownloadManager managerArg, int offset) {
 		manager = managerArg;
 		parser = new HeaderParser();
@@ -20,27 +22,49 @@ public class DownloadEstablished implements ManagerState {
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = parser.getSequenceNumber(incomingDatagram);
 		int ackNo = parser.getAcknowledgementNumber(incomingDatagram);
-		int payload = parser.getWindowSize(incomingDatagram);
-		byte[] data = parser.getData(incomingDatagram);
-		if (parser.getStatus(incomingDatagram) != HeaderConstructor.FIN) {
+
+//		System.out.println("The received command is " + parser.getCommand(incomingDatagram));
+//		System.out.println(HeaderConstructor.P);
+//		System.out.println(HeaderConstructor.P == parser.getCommand(data));
+		if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
+			nextState(incomingDatagram);
+		} else if (!containsFin(incomingDatagram)) {
+			int payload = parser.getWindowSize(incomingDatagram);
+			byte[] data = parser.getData(incomingDatagram);
 			actAccordingToWindow(seqNo, ackNo, payload, data);
 		} else {
-			manager.shutdownSession(seqNo, ackNo);
+			manager.shutdownSession(ackNo, seqNo);
 		}
 	}
 
+	public byte[] getLastAck() {
+		return lastAckSent;
+	}
+
+	private boolean containsFin(byte[] data) {
+		return parser.getStatus(data) == HeaderConstructor.FIN
+				|| parser.getStatus(data) == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK);
+	}
+
+	private void nextState(byte[] incomingDatagram) {
+		manager.setManagerState(new DownloadPaused(manager, this));
+		manager.processIncomingData(incomingDatagram);
+	}
+
 	private byte[] composeNewAck(int incomingAck) {
-		return manager.formHeader(incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(), 1);
+		return manager.formHeader(HeaderConstructor.ACK, incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(),
+				1);
 	}
 
 	private void actAccordingToWindow(int seqNo, int ackNo, int payload, byte[] data) {
 		if (algorithm.datagramInWindow(seqNo, payload)) {
 			algorithm.moveDatagramWindow(seqNo);
 			manager.writeToByteArray(data);
-			manager.processOutgoingData(composeNewAck(ackNo));
+			lastAckSent = composeNewAck(ackNo);
+			manager.processOutgoingData(lastAckSent);
 		} else {
-			System.out.println("The sequence number is: " + seqNo);
-			System.out.println("The ack number is: " + ackNo);
+			// System.out.println("The sequence number is: " + seqNo);
+			// System.out.println("The ack number is: " + ackNo);
 			System.out.println("Packet dropped, not in window");
 		}
 	}

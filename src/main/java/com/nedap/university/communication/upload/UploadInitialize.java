@@ -1,6 +1,5 @@
 package upload;
 
-import automaticRepeatRequest.UploadWindow;
 import header.HeaderParser;
 import managerStates.ManagerState;
 

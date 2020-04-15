@@ -10,14 +10,18 @@ public class HeaderConstructor {
 	public static final byte RM = 4;
 	public static final byte RP = 8;
 	public static final byte LS = 16;
-	public static final byte P = 32;
-	public static final byte R = 64;
 
 	/**
 	 * Communication commands
 	 */
 	public static final byte ACK = 1;
 	public static final byte FIN = 2;
+	public static final byte P = 4;
+	public static final byte R = 8;
+
+	public static final byte PAUSEACK = ACK ^ P;
+	public static final byte RESUMEACK = ACK ^ R;
+	public static final byte FINACK = ACK ^ FIN;
 
 	/**
 	 * Standard payloadSize of acknowledgement messages
@@ -67,7 +71,7 @@ public class HeaderConstructor {
 		return inputAsBytes;
 	}
 
-	private byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
+	public byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
 		for (int i = 0; i < inputArray.length; i++) {
 			header[startIndex] = (byte) inputArray[i];
 			startIndex++;

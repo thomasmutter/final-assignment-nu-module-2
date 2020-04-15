@@ -3,8 +3,8 @@ package upload;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
-import managers.CleanUpManager;
-import managers.PacketManager;
+import otherCommands.CleanUpManager;
+import otherCommands.PacketManager;
 import remaking.Session;
 import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
@@ -37,9 +37,9 @@ public class UploadManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	public byte[] formHeader(int seqNo, int ackNo, int payloadSize) {
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
 		byte flags = HeaderConstructor.UL;
-		byte status = HeaderConstructor.ACK;
+		byte status = statusArg;
 
 		int checksum = 0;
 		int windowSize = payloadSize;
@@ -64,11 +64,15 @@ public class UploadManager implements PacketManager {
 		return segment;
 	}
 
+	public void pauseSession(boolean toPause) {
+		session.pauseSender(toPause);
+	}
+
 	public void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
 		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(seqNo, ackNo);
+		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
 	}
 }

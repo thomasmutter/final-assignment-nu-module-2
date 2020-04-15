@@ -1,7 +1,7 @@
 package sessionTermination;
 
 import header.HeaderConstructor;
-import managers.CleanUpManager;
+import otherCommands.CleanUpManager;
 import time.TimeKeeper;
 
 public class SenderTermination implements Terminator {
@@ -16,7 +16,7 @@ public class SenderTermination implements Terminator {
 	}
 
 	@Override
-	public void terminateSession(int seqNo, int ackNo) {
+	public void terminateSession(byte status, int seqNo, int ackNo) {
 		if (FinSent) {
 			keeper.setFinTimer();
 			manager.sendFin((byte) (HeaderConstructor.ACK + HeaderConstructor.FIN), seqNo, ackNo);

@@ -2,25 +2,25 @@ package download;
 
 public class DownloadWindow {
 
-	private int lastByteAcked;
+	private int lastByteReceived;
 
 	public DownloadWindow(int offset) {
-		lastByteAcked = offset;
+		lastByteReceived = offset;
 	}
 
 	public void moveDatagramWindow(int seqNo) {
-		lastByteAcked = seqNo;
+		lastByteReceived = seqNo;
 	}
 
 	public int getAckNo() {
-		return lastByteAcked;
+		return lastByteReceived;
 	}
 
 	public boolean datagramInWindow(int incomingSeqNo, int payloadSize) {
-		int oke = incomingSeqNo - payloadSize;
-		System.out.println(oke);
-		System.out.println(lastByteAcked);
-		return incomingSeqNo - payloadSize == lastByteAcked;
+		// int a = incomingSeqNo - lastByteReceived;
+		// System.out.println("The incoming data differs with " + a + " bytes from the
+		// last received data");
+		return incomingSeqNo - payloadSize == lastByteReceived;
 	}
 
 }

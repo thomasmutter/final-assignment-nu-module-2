@@ -7,70 +7,77 @@ import java.util.TreeMap;
 
 public class OwnTimer implements Runnable {
 
-	private SortedMap<Long, Integer> map;
 	private SortedMap<Long, Integer> timerMap;
 	private TimeKeeper keeper;
+	private boolean paused;
+	private Object lock = new Object();
 
 	private static final long SHORTSLEEP = 10;
 	private static final long LONGSLEEP = 1000;
 
 	public OwnTimer(TimeKeeper keeperArg) {
-		map = new TreeMap<>();
+		timerMap = Collections.synchronizedSortedMap(new TreeMap<>());
 		keeper = keeperArg;
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			timerMap = Collections.synchronizedSortedMap(map);
-			if (!timerMap.isEmpty()) {
-				synchronized (timerMap) {
-					long time = timerMap.firstKey();
-					if (System.currentTimeMillis() - time > 1000) {
-						keeper.retransmit(timerMap.get(time));
-						timerMap.remove(time);
+			synchronized (lock) {
+				if (paused) {
+					try {
+						lock.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 				}
 			}
-			try {
-				Thread.sleep(getSleepTime());
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			checkRetransmissions();
+		}
+	}
 
-//			Set<Entry<Long, Integer>> entrySet = timerMap.entrySet();
-//			Iterator<Entry<Long, Integer>> timeIterator = entrySet.iterator();
-//			while (timeIterator.hasNext()) {
-//				Entry<Long, Integer> entry = timeIterator.next();
-//				long time = entry.getKey();
-//				if (System.currentTimeMillis() - time > 1000) {
-//					keeper.retransmit(entry.getValue());
-//					timeIterator.remove();
-//				}
-//			}
-//			try {
-//				Thread.sleep(getSleepTime());
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
+	private void checkRetransmissions() {
+		synchronized (timerMap) {
+			if (!timerMap.isEmpty()) {
+				long time = timerMap.firstKey();
+				if (System.currentTimeMillis() - time > LONGSLEEP) {
+					keeper.retransmit(timerMap.get(time));
+					timerMap.remove(time);
+				}
+			}
+		}
+		try {
+			Thread.sleep(getSleepTime());
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
 	private long getSleepTime() {
 		long goingToSleepTime = System.currentTimeMillis();
 		long sleepTime = 0;
-		if (!timerMap.isEmpty()) {
-			synchronized (timerMap) {
+		synchronized (timerMap) {
+			if (!timerMap.isEmpty()) {
 				sleepTime = timerMap.firstKey() - goingToSleepTime;
-			}
-			if (sleepTime > 0) {
-				return sleepTime;
+
+				if (sleepTime > 0) {
+					return sleepTime;
+				} else {
+					return SHORTSLEEP;
+				}
 			} else {
-				return SHORTSLEEP;
+				return LONGSLEEP;
 			}
-		} else {
-			return LONGSLEEP;
+		}
+	}
+
+	public void setPaused(boolean isPaused) {
+		paused = isPaused;
+		synchronized (lock) {
+			if (!isPaused) {
+				lock.notify();
+			}
 		}
 	}
 

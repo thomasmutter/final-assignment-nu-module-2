@@ -52,7 +52,7 @@ public class HeaderParser {
 		return header[0];
 	}
 
-	public int getStatus(byte[] header) {
+	public byte getStatus(byte[] header) {
 		return header[1];
 	}
 
