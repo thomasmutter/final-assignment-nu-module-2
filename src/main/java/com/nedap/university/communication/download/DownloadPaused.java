@@ -23,6 +23,7 @@ public class DownloadPaused extends Paused implements ManagerState {
 	@Override
 	public void resumeOperation() {
 		manager.setManagerState(download);
+		manager.pauseSession(false);
 	}
 
 	@Override
@@ -30,6 +31,12 @@ public class DownloadPaused extends Paused implements ManagerState {
 		byte[] ack = manager.formHeader(status, seqNo, ackNo, HeaderConstructor.ACKSIZE);
 		manager.processOutgoingData(ack);
 
+	}
+
+	@Override
+	public void pauseOperation() {
+		System.out.println("Pausing");
+		manager.pauseSession(true);
 	}
 
 }

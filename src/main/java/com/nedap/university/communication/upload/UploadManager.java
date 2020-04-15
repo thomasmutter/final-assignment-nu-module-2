@@ -64,6 +64,10 @@ public class UploadManager implements PacketManager {
 		return segment;
 	}
 
+	public void pauseSession(boolean toPause) {
+		session.pauseSender(toPause);
+	}
+
 	public void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
 		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));

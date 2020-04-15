@@ -22,13 +22,6 @@ public class DatagramSender implements Runnable {
 	private HeaderParser parser;
 
 	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
-//		port = 8888;
-//		try {
-//			address = InetAddress.getByName("127.0.0.1");
-//		} catch (UnknownHostException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
 		queue = new LinkedBlockingQueue<>();
 		socket = socketArg;
 		keeper = keeperArg;
@@ -77,6 +70,10 @@ public class DatagramSender implements Runnable {
 	public void setContactInformation(int portArg, InetAddress addressArg) {
 		port = portArg;
 		address = addressArg;
+	}
+
+	public void toPauseTimer(boolean toPause) {
+		keeper.pauseRetransmissionTimer(toPause);
 	}
 
 	public void close() {

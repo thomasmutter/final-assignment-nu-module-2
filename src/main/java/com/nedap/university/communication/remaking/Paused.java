@@ -5,26 +5,31 @@ import java.util.Random;
 import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
+import time.PauseTimer;
 import time.ResumeTimer;
 
 public abstract class Paused {
 
 	protected HeaderParser parser;
-	private ResumeTimer timer;
+	private ResumeTimer resumeTimer;
+	private PauseTimer pauseTimer;
 	private Random random;
 
 	public Paused() {
 		parser = new HeaderParser();
-		timer = new ResumeTimer(this);
+		resumeTimer = new ResumeTimer(this);
+		pauseTimer = new PauseTimer(this);
 		random = new Random();
 	}
 
 	public abstract void resumeOperation();
 
+	public abstract void pauseOperation();
+
 	protected void resumeOrPause(byte[] incomingDatagram) {
 		if (containsResume(parser.getStatus(incomingDatagram))) {
 			resume(incomingDatagram);
-		} else if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
+		} else if (containsPause(parser.getStatus(incomingDatagram))) {
 			pause(incomingDatagram);
 		}
 	}
@@ -36,6 +41,11 @@ public abstract class Paused {
 		} else if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
 			sendMessage(HeaderConstructor.PAUSEACK, random.nextInt(Integer.MAX_VALUE),
 					parser.getSequenceNumber(incomingDatagram));
+
+			new Thread(pauseTimer).start();
+			pauseTimer.increaseTimers();
+		} else {
+			pauseOperation();
 		}
 	}
 
@@ -46,8 +56,8 @@ public abstract class Paused {
 		} else if (parser.getStatus(incomingDatagram) == HeaderConstructor.R) {
 			sendMessage(HeaderConstructor.RESUMEACK, random.nextInt(Integer.MAX_VALUE),
 					parser.getSequenceNumber(incomingDatagram));
-			new Thread(timer).start();
-			timer.increaseTimers();
+			new Thread(resumeTimer).start();
+			resumeTimer.increaseTimers();
 		} else {
 			resumeOperation();
 		}
@@ -57,5 +67,9 @@ public abstract class Paused {
 
 	private boolean containsResume(byte status) {
 		return status == HeaderConstructor.R || status == HeaderConstructor.RESUMEACK;
+	}
+
+	private boolean containsPause(byte status) {
+		return status == HeaderConstructor.P || status == HeaderConstructor.PAUSEACK;
 	}
 }

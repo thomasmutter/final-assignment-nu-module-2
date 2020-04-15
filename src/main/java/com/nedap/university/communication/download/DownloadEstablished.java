@@ -27,7 +27,6 @@ public class DownloadEstablished implements ManagerState {
 //		System.out.println(HeaderConstructor.P);
 //		System.out.println(HeaderConstructor.P == parser.getCommand(data));
 		if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
-			System.out.println("---- PAUSING ----");
 			nextState(incomingDatagram);
 		} else if (!containsFin(incomingDatagram)) {
 			int payload = parser.getWindowSize(incomingDatagram);

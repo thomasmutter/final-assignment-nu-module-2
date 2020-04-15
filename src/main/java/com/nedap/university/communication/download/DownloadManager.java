@@ -61,6 +61,10 @@ public class DownloadManager implements PacketManager {
 		managerState = state;
 	}
 
+	public void pauseSession(boolean toPause) {
+		session.pauseSender(toPause);
+	}
+
 	public void shutdownSession(int seqNo, int ackNo) {
 		finalizeFileTransfer();
 		CleanUpManager cleanUp = new CleanUpManager(session);

@@ -20,6 +20,7 @@ public class TimeKeeper {
 	private Session session;
 	private HeaderParser parser;
 	protected OwnTimer timer;
+	private Thread timerThread;
 
 	private List<Byte> timerBlacklist;
 
@@ -40,7 +41,7 @@ public class TimeKeeper {
 
 	protected void initiateRetransmissionTimer() {
 		timer = new OwnTimer(this);
-		Thread timerThread = new Thread(timer);
+		timerThread = new Thread(timer);
 		timerThread.setDaemon(true);
 		timerThread.start();
 	}
@@ -57,6 +58,10 @@ public class TimeKeeper {
 
 	public void decrementFinTimers() {
 		finTimersSet--;
+	}
+
+	public void pauseRetransmissionTimer(boolean isPaused) {
+		timer.setPaused(isPaused);
 	}
 
 //	public void setRetransmissionTimer(byte[] datagram) {

@@ -22,6 +22,7 @@ public class UploadPaused extends Paused implements ManagerState {
 	@Override
 	public void resumeOperation() {
 		manager.setManagerState(upload);
+		manager.pauseSession(false);
 
 	}
 
@@ -30,6 +31,12 @@ public class UploadPaused extends Paused implements ManagerState {
 		byte[] ack = manager.formHeader(status, seqNo, ackNo, HeaderConstructor.ACKSIZE);
 		manager.processOutgoingData(ack, new byte[] { 0 });
 
+	}
+
+	@Override
+	public void pauseOperation() {
+		System.out.println("Pausing");
+		manager.pauseSession(true);
 	}
 
 }

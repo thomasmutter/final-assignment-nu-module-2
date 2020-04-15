@@ -54,6 +54,10 @@ public class Session {
 		addToSendQueue(pauseDatagram);
 	}
 
+	public void pauseSender(boolean toPause) {
+		sender.toPauseTimer(toPause);
+	}
+
 	public void resume() {
 		byte[] resumeDatagram = Protocol.buildTrigger(HeaderConstructor.R);
 		addToSendQueue(resumeDatagram);
