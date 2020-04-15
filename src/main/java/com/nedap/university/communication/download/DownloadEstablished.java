@@ -1,6 +1,5 @@
 package download;
 
-import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -23,16 +22,16 @@ public class DownloadEstablished implements ManagerState {
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = parser.getSequenceNumber(incomingDatagram);
 		int ackNo = parser.getAcknowledgementNumber(incomingDatagram);
-		int payload = parser.getWindowSize(incomingDatagram);
-		byte[] data = parser.getData(incomingDatagram);
+
 //		System.out.println("The received command is " + parser.getCommand(incomingDatagram));
 //		System.out.println(HeaderConstructor.P);
 //		System.out.println(HeaderConstructor.P == parser.getCommand(data));
-		if (parser.getCommand(incomingDatagram) == HeaderConstructor.P) {
-			System.out.println("SENDING PAUSE");
-			manager.processOutgoingData(Protocol.PAUSE);
-			nextState();
+		if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
+			System.out.println("---- PAUSING ----");
+			nextState(incomingDatagram);
 		} else if (!containsFin(incomingDatagram)) {
+			int payload = parser.getWindowSize(incomingDatagram);
+			byte[] data = parser.getData(incomingDatagram);
 			actAccordingToWindow(seqNo, ackNo, payload, data);
 		} else {
 			manager.shutdownSession(ackNo, seqNo);
@@ -48,12 +47,13 @@ public class DownloadEstablished implements ManagerState {
 				|| parser.getStatus(data) == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK);
 	}
 
-	private void nextState() {
+	private void nextState(byte[] incomingDatagram) {
 		manager.setManagerState(new DownloadPaused(manager, this));
+		manager.processIncomingData(incomingDatagram);
 	}
 
 	private byte[] composeNewAck(int incomingAck) {
-		return manager.formHeader(HeaderConstructor.DL, incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(),
+		return manager.formHeader(HeaderConstructor.ACK, incomingAck + HeaderConstructor.ACKSIZE, algorithm.getAckNo(),
 				1);
 	}
 

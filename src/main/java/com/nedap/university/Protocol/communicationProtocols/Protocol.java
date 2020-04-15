@@ -1,6 +1,6 @@
 package communicationProtocols;
 
-import header.HeaderConstructor;
+import java.util.Random;
 
 public class Protocol {
 
@@ -19,7 +19,16 @@ public class Protocol {
 	/**
 	 * Pause and resume initialization messages
 	 */
-	public static final byte[] PAUSE = new byte[] { HeaderConstructor.P };
-	public static final byte[] RESUME = new byte[] { HeaderConstructor.R };
+	public static final int TRIGGERLENGTH = 10;
 
+	public static byte[] buildTrigger(byte status) {
+		byte[] trigger = new byte[10];
+		Random random = new Random();
+		trigger[1] = status;
+		trigger[0] = 0;
+		for (int i = 2; i < trigger.length; i++) {
+			trigger[i] = (byte) random.nextInt(Byte.MAX_VALUE);
+		}
+		return trigger;
+	}
 }

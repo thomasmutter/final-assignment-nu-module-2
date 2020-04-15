@@ -1,10 +1,13 @@
 package time;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
+import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
 
@@ -18,11 +21,21 @@ public class TimeKeeper {
 	private HeaderParser parser;
 	protected OwnTimer timer;
 
+	private List<Byte> timerBlacklist;
+
 	public TimeKeeper(Session sessionArg) {
 		session = sessionArg;
 		unAckedPackets = Collections.synchronizedMap(new HashMap<>());
+		initializeBlacklist();
 		parser = new HeaderParser();
 		initiateRetransmissionTimer();
+	}
+
+	private void initializeBlacklist() {
+		timerBlacklist = new ArrayList<>();
+		timerBlacklist.add(HeaderConstructor.FINACK);
+		timerBlacklist.add(HeaderConstructor.PAUSEACK);
+		timerBlacklist.add(HeaderConstructor.RESUMEACK);
 	}
 
 	protected void initiateRetransmissionTimer() {
@@ -55,14 +68,16 @@ public class TimeKeeper {
 //	}
 
 	public void setRetransmissionTimer(byte[] datagram) {
-		int sequenceNumber = parser.getSequenceNumber(parser.getHeader(datagram));
-		unAckedPackets.put(sequenceNumber, datagram);
-		timer.getTimerMap().put(System.currentTimeMillis(), sequenceNumber);
+		if (!timerBlacklist.contains(parser.getStatus(datagram))) {
+			int sequenceNumber = parser.getSequenceNumber(datagram);
+			unAckedPackets.put(sequenceNumber, datagram);
+			timer.getTimerMap().put(System.currentTimeMillis(), sequenceNumber);
+		}
 	}
 
 	public void retransmit(int sequenceNumber) {
 		if (unAckedPackets.containsKey(sequenceNumber)) {
-//			System.out.println("Resending packet with seqNo " + sequenceNumber);
+//		System.out.println("Resending packet with seqNo " + sequenceNumber);
 			session.addToSendQueue(unAckedPackets.get(sequenceNumber));
 		}
 	}
@@ -74,4 +89,5 @@ public class TimeKeeper {
 		timer.getTimerMap().values().remove(ackNumber);
 //		System.out.println("Ack removed from maps");
 	}
+
 }

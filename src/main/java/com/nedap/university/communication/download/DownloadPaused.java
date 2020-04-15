@@ -1,34 +1,35 @@
 package download;
 
 import header.HeaderConstructor;
-import header.HeaderParser;
 import managerStates.ManagerState;
+import remaking.Paused;
 
-public class DownloadPaused implements ManagerState {
+public class DownloadPaused extends Paused implements ManagerState {
 
 	private DownloadManager manager;
 	private DownloadEstablished download;
-	private HeaderParser parser;
 
 	public DownloadPaused(DownloadManager managerArg, DownloadEstablished downloadEstablished) {
+		super();
 		manager = managerArg;
 		download = downloadEstablished;
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
-		if (parser.getCommand(incomingDatagram) == HeaderConstructor.R) {
-			nextState();
-			byte[] lastAck = download.getLastAck();
-			byte[] ack = manager.formHeader(HeaderConstructor.R, parser.getSequenceNumber(lastAck),
-					parser.getAcknowledgementNumber(lastAck), parser.getWindowSize(lastAck));
-			manager.processOutgoingData(ack);
-		}
+		resumeOrPause(incomingDatagram);
 	}
 
-	private void nextState() {
+	@Override
+	public void resumeOperation() {
 		manager.setManagerState(download);
+	}
+
+	@Override
+	protected void sendMessage(byte status, int seqNo, int ackNo) {
+		byte[] ack = manager.formHeader(status, seqNo, ackNo, HeaderConstructor.ACKSIZE);
+		manager.processOutgoingData(ack);
+
 	}
 
 }

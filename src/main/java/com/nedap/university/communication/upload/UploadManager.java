@@ -37,9 +37,9 @@ public class UploadManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	public byte[] formHeader(byte command, int seqNo, int ackNo, int payloadSize) {
-		byte flags = command;
-		byte status = HeaderConstructor.ACK;
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
+		byte flags = HeaderConstructor.UL;
+		byte status = statusArg;
 
 		int checksum = 0;
 		int windowSize = payloadSize;

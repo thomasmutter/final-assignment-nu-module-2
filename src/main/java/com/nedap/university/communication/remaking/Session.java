@@ -5,6 +5,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import otherCommands.PacketManager;
 import queues.DatagramReceiver;
@@ -49,12 +50,12 @@ public class Session {
 	}
 
 	public void pause() {
-		byte[] pauseDatagram = new byte[] { HeaderConstructor.P };
+		byte[] pauseDatagram = Protocol.buildTrigger(HeaderConstructor.P);
 		addToSendQueue(pauseDatagram);
 	}
 
 	public void resume() {
-		byte[] resumeDatagram = new byte[] { HeaderConstructor.R };
+		byte[] resumeDatagram = Protocol.buildTrigger(HeaderConstructor.R);
 		addToSendQueue(resumeDatagram);
 	}
 

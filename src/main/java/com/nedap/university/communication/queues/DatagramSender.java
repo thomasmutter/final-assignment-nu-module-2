@@ -42,6 +42,8 @@ public class DatagramSender implements Runnable {
 				DatagramPacket packetToSend = queue.take();
 				socket.send(packetToSend);
 //				printInformation(packetToSend);
+				if (parser.getStatus(packetToSend.getData()) == (HeaderConstructor.P ^ HeaderConstructor.ACK))
+					System.out.println("sending packet with status: " + parser.getStatus(packetToSend.getData()));
 				keeper.setRetransmissionTimer(packetToSend.getData());
 			} catch (IOException e) {
 				System.out.println("Sender closed");

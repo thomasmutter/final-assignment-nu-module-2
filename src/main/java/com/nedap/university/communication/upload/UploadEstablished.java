@@ -1,6 +1,5 @@
 package upload;
 
-import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -25,9 +24,8 @@ public class UploadEstablished implements ManagerState {
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
-		if (parser.getCommand(incomingDatagram) == HeaderConstructor.P) {
-			nextState();
-			manager.processOutgoingData(Protocol.PAUSE, new byte[] { 0 });
+		if (parser.getStatus(incomingDatagram) == HeaderConstructor.P) {
+			nextState(incomingDatagram);
 			return;
 		}
 
@@ -52,8 +50,9 @@ public class UploadEstablished implements ManagerState {
 		return dataToSend;
 	}
 
-	private void nextState() {
+	private void nextState(byte[] incomingDatagram) {
 		manager.setManagerState(new UploadPaused(manager, this));
+		manager.processIncomingData(incomingDatagram);
 	}
 
 	private void sendOrDiscardDatagram(int seqNo, int ackNo) {
@@ -68,7 +67,7 @@ public class UploadEstablished implements ManagerState {
 		int seqNo = oldSeqNo + payloadSize;
 		dataToSend = manager.getSegmentFromFile(payloadSize, filePointer);
 		filePointer += payloadSize;
-		headerToSend = manager.formHeader(HeaderConstructor.UL, seqNo, ackToSend, payloadSize);
+		headerToSend = manager.formHeader(HeaderConstructor.ACK, seqNo, ackToSend, payloadSize);
 		manager.processOutgoingData(headerToSend, dataToSend);
 	}
 

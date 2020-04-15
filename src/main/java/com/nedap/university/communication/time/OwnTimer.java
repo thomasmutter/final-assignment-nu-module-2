@@ -11,7 +11,7 @@ public class OwnTimer implements Runnable {
 	private TimeKeeper keeper;
 
 	private static final long SHORTSLEEP = 10;
-	private static final long LONGSLEEP = 10;
+	private static final long LONGSLEEP = 1000;
 
 	public OwnTimer(TimeKeeper keeperArg) {
 		timerMap = Collections.synchronizedSortedMap(new TreeMap<>());
