@@ -78,8 +78,7 @@ public class Client {
 	public void startSession(String command) throws SocketException {
 //		String command = tui.getCommand();
 
-		Session session = null;
-		session = new Session();
+		Session session = new Session();
 
 		InputInterpreter input = new InputInterpreter(command, this);
 		byte[] inputDatagram = input.getDatagramFromInput();

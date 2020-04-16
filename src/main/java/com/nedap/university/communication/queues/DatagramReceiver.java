@@ -29,17 +29,14 @@ public class DatagramReceiver implements Runnable {
 	public void run() {
 		try {
 			DatagramPacket firstPacket = receiveDatagram();
-			keeper.processIncomingAck(firstPacket.getData());
 			session.setUpContact(firstPacket.getAddress(), firstPacket.getPort());
+			keeper.processIncomingAck(firstPacket.getData());
+			session.giveDatagramToManager(firstPacket);
+//			printInformation(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
-//				try {
-//					Thread.sleep(1);
-//				} catch (InterruptedException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
+
 				if (random.nextInt(100) < 100) {
 //					printInformation(receivedPacket);
 					keeper.processIncomingAck(receivedPacket.getData());

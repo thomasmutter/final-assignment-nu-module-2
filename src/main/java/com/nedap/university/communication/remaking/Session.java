@@ -31,7 +31,6 @@ public class Session {
 		receiver = new DatagramReceiver(socket, this, keeper);
 		sender = new DatagramSender(socket, keeper);
 		new Thread(receiver).start();
-		new Thread(sender).start();
 	}
 
 	public void setUpContact(InetAddress address, int port) {
@@ -40,8 +39,7 @@ public class Session {
 
 	public void addToSendQueue(byte[] packet) {
 		packet = checksum.appendCRC(packet);
-		DatagramPacket datagram = sender.wrapPacketInUDP(packet);
-		sender.addDatagramToQueue(datagram);
+		sender.sendPacket(packet);
 	}
 
 	public void setManager(PacketManager managerArg) {
