@@ -2,7 +2,7 @@ package download;
 
 import communicationProtocols.Protocol;
 import managerStates.ManagerState;
-import remaking.Paused;
+import session.Paused;
 
 public class DownloadPaused extends Paused implements ManagerState {
 

@@ -27,6 +27,7 @@ public class DownloadEstablished implements ManagerState {
 			byte[] data = HeaderParser.getData(incomingDatagram);
 			actAccordingToWindow(offset, ackNo, payload, data);
 		} else {
+			manager.finalizeFileTransfer();
 			manager.shutdownSession(ackNo, seqNo);
 		}
 	}
@@ -50,10 +51,6 @@ public class DownloadEstablished implements ManagerState {
 			algorithm.moveDatagramWindow(offset);
 			manager.writeToByteArray(data, offset, payload);
 			manager.processOutgoingData(composeNewAck(ackNo));
-		} else {
-			// System.out.println("The sequence number is: " + seqNo);
-			// System.out.println("The ack number is: " + ackNo);
-			System.out.println("Packet dropped, not in window");
 		}
 	}
 

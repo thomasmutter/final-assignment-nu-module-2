@@ -1,15 +1,19 @@
 package server;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.net.DatagramPacket;
 
 import communicationProtocols.Protocol;
 import download.DownloadManager;
 import header.HeaderParser;
+import otherCommands.CleanUpManager;
 import otherCommands.ListManager;
 import otherCommands.PacketManager;
 import otherCommands.RemoveManager;
-import remaking.Session;
+import session.Session;
+import sessionTermination.SenderTermination;
+import sessionTermination.Terminator;
 import upload.UploadManager;
 
 public class RequestHandler {
@@ -21,7 +25,11 @@ public class RequestHandler {
 		case Protocol.UL:
 			return new DownloadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
 		case Protocol.DL:
-			return new UploadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
+			try {
+				return new UploadManager(session, PATH + File.separator + getFileNameFromDatagram(data));
+			} catch (FileNotFoundException e) {
+				return handleFileNotFound(session);
+			}
 		case Protocol.LS:
 			return new ListManager(session);
 		default:
@@ -36,5 +44,13 @@ public class RequestHandler {
 		byte[] payload = new byte[fulldata.length - 2 - Protocol.HEADERLENGTH];
 		System.arraycopy(HeaderParser.getData(fulldata), 0, payload, 0, payload.length);
 		return new String(payload);
+	}
+
+	private CleanUpManager handleFileNotFound(Session session) {
+		CleanUpManager cleanUp = new CleanUpManager(session);
+		Terminator terminator = new SenderTermination(cleanUp, session);
+		cleanUp.setTerminator(terminator);
+		terminator.terminateSession(Protocol.FIN, 0, 0);
+		return cleanUp;
 	}
 }

@@ -2,7 +2,7 @@ package upload;
 
 import communicationProtocols.Protocol;
 import managerStates.ManagerState;
-import remaking.Paused;
+import session.Paused;
 
 public class UploadPaused extends Paused implements ManagerState {
 

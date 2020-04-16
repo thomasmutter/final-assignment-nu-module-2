@@ -6,6 +6,7 @@ import java.util.Set;
 public class Metrics {
 
 	private long startTime;
+	private long averageRtt;
 	private int packetsSent;
 
 	private Set<Integer> uniquePacketsSent;
@@ -43,17 +44,23 @@ public class Metrics {
 		return lostString;
 	}
 
-	public void updatePacketsSent(int packetId, int size) {
+	public void updateMetrics(int packetId, int size, long rtt) {
 		packetsSent++;
+		averageRtt = rtt;
 		averagePacketLength = averagePacketLength + size / packetsSent;
 		if (!uniquePacketsSent.contains(packetId)) {
 			uniquePacketsSent.add(packetId);
 		}
 	}
 
+	private String uniquePackets() {
+		return uniquePacketsSent.size() + " unique packets have been sent";
+	}
+
 	@Override
 	public String toString() {
-		return getTimePassed() + "\n" + calculateUpSpeed() + "\n" + lostPackets() + "\n";
+		return getTimePassed() + "\n" + calculateUpSpeed() + "\n" + lostPackets() + "\n" + uniquePackets() + "\n"
+				+ "The average RTT is " + averageRtt;
 	}
 
 }

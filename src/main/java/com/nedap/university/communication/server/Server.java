@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 import communicationProtocols.Protocol;
-import remaking.Session;
+import session.Session;
 
 public class Server implements Runnable {
 
@@ -19,8 +19,8 @@ public class Server implements Runnable {
 	private void handleRequest(DatagramPacket request) throws IOException {
 		Session session = new Session();
 		RequestHandler handler = new RequestHandler();
-		session.setManager(handler.getPacketManagerFromRequest(request, session));
 		session.setUpContact(request.getAddress(), request.getPort());
+		session.setManager(handler.getPacketManagerFromRequest(request, session));
 		session.giveDatagramToManager(request);
 	}
 
@@ -55,6 +55,7 @@ public class Server implements Runnable {
 
 		try {
 			Server server = new Server(port);
+			System.out.println("Server started");
 			new Thread(server).start();
 		} catch (SocketException s) {
 			System.out.println("Socket error: " + s.getMessage());

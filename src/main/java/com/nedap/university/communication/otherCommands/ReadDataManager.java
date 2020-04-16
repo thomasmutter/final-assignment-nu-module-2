@@ -1,10 +1,13 @@
 package otherCommands;
 
+import java.io.FileNotFoundException;
+
 import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import sessionTermination.ReceiverTermination;
+import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
 import upload.UploadManager;
 
@@ -19,8 +22,15 @@ public class ReadDataManager implements PacketManager {
 	@Override
 	public void processIncomingData(byte[] data) {
 		if (HeaderParser.getCommand(data) == Protocol.RP) {
-			UploadManager upload = new UploadManager(session,
-					"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
+			UploadManager upload = null;
+			try {
+				upload = new UploadManager(session,
+						"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
+			} catch (FileNotFoundException e) {
+				System.out.println("File not found. Please try another command");
+				new SenderTermination(new CleanUpManager(session), session).terminateSession(Protocol.FIN, 0, 0);
+				return;
+			}
 			session.setManager(upload);
 			System.out.println("GOING TO UPLOAD");
 			upload.processIncomingData(data);

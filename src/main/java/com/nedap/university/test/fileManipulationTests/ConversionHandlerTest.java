@@ -3,6 +3,7 @@ package fileManipulationTests;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ class ConversionHandlerTest {
 	}
 
 	@Test
-	void testFileToBytesConversion() {
+	void testFileToBytesConversion() throws FileNotFoundException {
 		String fileContents = "This file is used for t3s+!nG.";
 		byte[] contentBytes = fileContents.getBytes();
 		byte[] fileBytes = handler.readFileToBytes(DIR + File.separator + "testFile");

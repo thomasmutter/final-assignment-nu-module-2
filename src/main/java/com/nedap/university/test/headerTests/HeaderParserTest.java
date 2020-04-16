@@ -12,14 +12,10 @@ import header.HeaderParser;
 
 class HeaderParserTest {
 
-	private HeaderParser parser;
-	private HeaderConstructor constructor;
 	private Random random;
 
 	@BeforeEach
 	void setUp() throws Exception {
-		parser = new HeaderParser();
-		constructor = new HeaderConstructor();
 		random = new Random();
 	}
 
@@ -32,7 +28,7 @@ class HeaderParserTest {
 		ipv4Address[2] = 255;
 		ipv4Address[3] = 2;
 
-		int testInt = parser.getIntFromByteArray(ipv4Address);
+		int testInt = HeaderParser.getIntFromByteArray(ipv4Address);
 
 		assertEquals(expectedInt, testInt);
 
@@ -44,8 +40,8 @@ class HeaderParserTest {
 
 		System.out.println("Tested number is: " + input);
 
-		int[] byteArray = constructor.getBytesFromInt(input, 4);
-		int result = parser.getIntFromByteArray(byteArray);
+		int[] byteArray = HeaderConstructor.getBytesFromInt(input, 4);
+		int result = HeaderParser.getIntFromByteArray(byteArray);
 
 		assertEquals(input, result);
 	}

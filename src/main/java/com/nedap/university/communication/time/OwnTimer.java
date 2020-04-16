@@ -10,19 +10,22 @@ public class OwnTimer implements Runnable {
 	private SortedMap<Long, Integer> timerMap;
 	private TimeKeeper keeper;
 	private boolean paused;
+	private boolean isStopped;
 	private Object lock = new Object();
 
 	private static final long SHORTSLEEP = 10;
-	private static final long LONGSLEEP = 1000;
+	private long rtt;
 
 	public OwnTimer(TimeKeeper keeperArg) {
 		timerMap = Collections.synchronizedSortedMap(new TreeMap<>());
 		keeper = keeperArg;
+		rtt = 100;
 	}
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!isStopped) {
+//			System.out.println("RTT is: " + rtt + " ms");
 			synchronized (lock) {
 				if (paused) {
 					try {
@@ -40,14 +43,14 @@ public class OwnTimer implements Runnable {
 		synchronized (timerMap) {
 			if (!timerMap.isEmpty()) {
 				long time = timerMap.firstKey();
-				if (System.currentTimeMillis() - time > LONGSLEEP) {
+				if (System.currentTimeMillis() - time > rtt) {
 					keeper.retransmit(timerMap.get(time));
 					timerMap.remove(time);
 				}
 			}
 		}
 		try {
-			Thread.sleep(getSleepTime());
+			Thread.sleep(getSleepTime() + 1);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -67,7 +70,8 @@ public class OwnTimer implements Runnable {
 					return SHORTSLEEP;
 				}
 			} else {
-				return LONGSLEEP;
+
+				return rtt;
 			}
 		}
 	}
@@ -81,8 +85,20 @@ public class OwnTimer implements Runnable {
 		}
 	}
 
+	public void setSleepTimer(long time) {
+		rtt = time;
+	}
+
+	public long getRtt() {
+		return rtt;
+	}
+
 	public Map<Long, Integer> getTimerMap() {
 		return timerMap;
+	}
+
+	public void setStopped(boolean stop) {
+		isStopped = stop;
 	}
 
 }

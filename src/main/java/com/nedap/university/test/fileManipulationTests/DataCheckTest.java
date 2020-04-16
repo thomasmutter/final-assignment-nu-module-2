@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,7 @@ class DataCheckTest {
 	}
 
 	@Test
-	void testCRC() {
+	void testCRC() throws FileNotFoundException {
 		byte[] file = handler.readFileToBytes(DIR + File.separator + "cat.jpg");
 		int remainder = checksum.calculateRemainder(file);
 		assertFalse(remainder == 0);
@@ -42,7 +43,7 @@ class DataCheckTest {
 	}
 
 	@Test
-	void TestCRCMistakeDetection() {
+	void TestCRCMistakeDetection() throws FileNotFoundException {
 		byte[] file = handler.readFileToBytes(DIR + File.separator + "cat.jpg");
 		byte[] fileWithCRC = checksum.appendCRC(file);
 		Random random = new Random();

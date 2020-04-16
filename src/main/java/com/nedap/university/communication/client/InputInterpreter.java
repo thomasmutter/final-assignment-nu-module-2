@@ -1,5 +1,7 @@
 package client;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,22 +9,20 @@ import communicationProtocols.Protocol;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import otherCommands.ReadDataManager;
-import remaking.Session;
+import session.Session;
 import upload.UploadEstablished;
 import upload.UploadManager;
 import upload.UploadWindow;
 
 public class InputInterpreter {
 
-	private static final String PATH = "src/main/java/com/nedap/university/resources/";
+	private static final String PATH = System.getProperty("user.dir");
 	private static List<String> commandList;
 
 	private String[] inputArray;
-	private Client client;
 
-	public InputInterpreter(String input, Client clientArg) {
+	public InputInterpreter(String input) {
 		inputArray = input.split("\\s+");
-		client = clientArg;
 		initializeCommandList();
 	}
 
@@ -42,15 +42,15 @@ public class InputInterpreter {
 		return datagram;
 	}
 
-	public byte[] setUpSession(Session session) {
+	public byte[] setUpSession(Session session) throws FileNotFoundException {
 		switch (getFlagsFromCommand(inputArray[0])) {
 		case Protocol.UL:
-			UploadManager uploadManager = new UploadManager(session, PATH + inputArray[1]);
+			UploadManager uploadManager = new UploadManager(session, PATH + File.separator + inputArray[1]);
 			uploadManager.setManagerState(new UploadEstablished(uploadManager, new UploadWindow()));
 			session.setManager(uploadManager);
 			return getDatagramFromInput(uploadManager.getFileSize());
 		case Protocol.DL:
-			DownloadManager downloadManager = new DownloadManager(session, PATH + inputArray[1]);
+			DownloadManager downloadManager = new DownloadManager(session, PATH + File.separator + inputArray[1]);
 			session.setManager(downloadManager);
 			return getDatagramFromInput(0);
 		default:

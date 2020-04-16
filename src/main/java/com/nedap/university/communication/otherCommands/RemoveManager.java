@@ -6,10 +6,9 @@ import communicationProtocols.Protocol;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
-import time.TimeKeeper;
 
 public class RemoveManager implements PacketManager {
 
@@ -91,7 +90,7 @@ public class RemoveManager implements PacketManager {
 
 	private void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
-		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
+		Terminator terminator = new SenderTermination(cleanUp, session);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
 		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);

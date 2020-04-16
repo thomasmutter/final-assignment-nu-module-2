@@ -14,9 +14,9 @@ public class ReceiverTermination implements Terminator {
 
 	@Override
 	public void terminateSession(byte status, int seqNo, int ackNo) {
-		if (FinSent && status == (byte) (Protocol.FIN + Protocol.ACK)) {
+		if (FinSent && (status == Protocol.FINACK)) {
 			manager.shutdownSession();
-		} else {
+		} else if (status == Protocol.FIN) {
 			manager.sendFin(Protocol.FIN, seqNo, ackNo);
 			FinSent = true;
 		}

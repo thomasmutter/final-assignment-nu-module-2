@@ -3,7 +3,7 @@ package otherCommands;
 import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import sessionTermination.Terminator;
 
 public class CleanUpManager implements PacketManager {

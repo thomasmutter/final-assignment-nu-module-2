@@ -17,7 +17,7 @@ public class UploadInitialize implements ManagerState {
 		int incomingSeq = HeaderParser.getSequenceNumber(incomingDatagram);
 		nextState();
 		manager.processOutgoingData(
-				manager.formHeader(Protocol.UL, Protocol.ACKSIZE, incomingSeq, manager.getFileSize()),
+				manager.formHeader(Protocol.ACK, Protocol.ACKSIZE, incomingSeq, manager.getFileSize()),
 				new byte[] { 0 });
 
 	}

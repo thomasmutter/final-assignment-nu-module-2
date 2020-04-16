@@ -3,10 +3,11 @@ package queues;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Random;
 
 import communicationProtocols.Protocol;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import time.TimeKeeper;
 
 public class DatagramReceiver implements Runnable {
@@ -14,11 +15,13 @@ public class DatagramReceiver implements Runnable {
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
 	private Session session;
+	private Random random;
 
 	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
 		keeper = keeperArg;
+		random = new Random();
 	}
 
 	@Override
@@ -26,25 +29,20 @@ public class DatagramReceiver implements Runnable {
 		try {
 			DatagramPacket firstPacket = receiveDatagram();
 			session.setUpContact(firstPacket.getAddress(), firstPacket.getPort());
+			System.out.println("-- SET UP NEW CONTACT INFO AT " + firstPacket.getPort());
 			keeper.processIncomingAck(firstPacket.getData());
 			session.giveDatagramToManager(firstPacket);
 //			printInformation(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
-//				Random random = new Random();
 
-//				if (random.nextInt(100) < 100) {
+				if (random.nextInt(100) < 100) {
 //					printInformation(receivedPacket);
-				keeper.processIncomingAck(receivedPacket.getData());
-				session.giveDatagramToManager(receivedPacket);
-//				} else {
-				// System.out.println("----- PACKET LOSS ------");
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
+					keeper.processIncomingAck(receivedPacket.getData());
+					session.giveDatagramToManager(receivedPacket);
+				}
+//				else {
+//					System.out.println("----- PACKET LOSS ------");
 //				}
 			}
 		} catch (IOException e) {

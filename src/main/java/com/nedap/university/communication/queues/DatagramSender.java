@@ -29,7 +29,7 @@ public class DatagramSender {
 			DatagramPacket datagram = new DatagramPacket(packet, packet.length, address, port);
 //			printInformation(datagram);
 			socket.send(datagram);
-			metrics.updatePacketsSent(HeaderParser.getSequenceNumber(packet), packet.length);
+			metrics.updateMetrics(HeaderParser.getSequenceNumber(packet), packet.length, keeper.getRttFromTimer());
 			keeper.setRetransmissionTimer(packet);
 		} catch (IOException e) {
 			System.out.println("Sender closed");
@@ -62,7 +62,10 @@ public class DatagramSender {
 
 	public void close() {
 		System.out.println(metrics.toString());
+		keeper.closeTimer();
+		System.out.println("Timer closed");
 		socket.close();
+		System.out.println("Sender closed too");
 	}
 
 }

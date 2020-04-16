@@ -1,15 +1,16 @@
 package upload;
 
+import java.io.FileNotFoundException;
+
 import communicationProtocols.Protocol;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
 import otherCommands.CleanUpManager;
 import otherCommands.PacketManager;
-import remaking.Session;
+import session.Session;
 import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
-import time.TimeKeeper;
 
 public class UploadManager implements PacketManager {
 
@@ -19,10 +20,10 @@ public class UploadManager implements PacketManager {
 	private byte[] fileAsBytes;
 	private int fileSize;
 
-	public UploadManager(Session sessionArg, String pathArg) {
-		fileSize = fetchFileFromDisk(pathArg);
+	public UploadManager(Session sessionArg, String pathArg) throws FileNotFoundException {
 		session = sessionArg;
 		state = new UploadInitialize(this);
+		fileSize = fetchFileFromDisk(pathArg);
 
 	}
 
@@ -53,7 +54,7 @@ public class UploadManager implements PacketManager {
 		return fileSize;
 	}
 
-	public int fetchFileFromDisk(String path) {
+	public int fetchFileFromDisk(String path) throws FileNotFoundException {
 		ConversionHandler fileToByteConverter = new ConversionHandler();
 		fileAsBytes = fileToByteConverter.readFileToBytes(path);
 		return fileAsBytes.length;
@@ -73,7 +74,7 @@ public class UploadManager implements PacketManager {
 
 	public void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
-		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
+		Terminator terminator = new SenderTermination(cleanUp, session);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
 		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
