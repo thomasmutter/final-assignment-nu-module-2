@@ -11,6 +11,7 @@ import java.util.Map;
 
 import communicationProtocols.Protocol;
 import remaking.Session;
+import transferInformation.Metrics;
 
 public class Client {
 
@@ -24,8 +25,12 @@ public class Client {
 		sessionMap = new HashMap<>();
 	}
 
-	public void addSessionToMap(String fileName, Session session) {
-		sessionMap.put(fileName, session);
+	public void addSessionToMap(String command, Session session) {
+		String[] split = command.split("\\s+");
+		if (split.length > 1) {
+			System.out.println("SESSION ADDED TO MAP");
+			sessionMap.put(split[1], session);
+		}
 	}
 
 	public void pauseSession(String fileName) {
@@ -36,6 +41,11 @@ public class Client {
 	public void resumeSession(String fileName) {
 		Session sessionToResume = sessionMap.get(fileName);
 		sessionToResume.resume();
+	}
+
+	public Metrics getMetricsFromSession(String fileName) {
+		Session session = sessionMap.get(fileName);
+		return session.getMetricsFromSender();
 	}
 
 	private void lookForServer() throws IOException {
@@ -55,7 +65,7 @@ public class Client {
 		}
 		serverAddress = signOfLife.getAddress();
 		InputListener listener = new InputListener(this);
-		System.out.println("_-----------STARTING NEW LISTNER-----------");
+		System.out.println("_-----------STARTING NEW LISTENER-----------");
 		new Thread(listener).start();
 	}
 
@@ -81,6 +91,7 @@ public class Client {
 		Session session = new Session();
 
 		InputInterpreter input = new InputInterpreter(command, this);
+		addSessionToMap(command, session);
 		byte[] inputDatagram = input.getDatagramFromInput();
 		session.setManager(input.getPacketManagerFromInput(session));
 		System.out.println("Address: " + serverAddress);

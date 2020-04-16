@@ -60,7 +60,7 @@ public class InputListener implements Runnable {
 			in.close();
 			break;
 		case "stats":
-			System.out.println("NICE STATS MAN");
+			System.out.println(client.getMetricsFromSession(fileName).toString());
 			break;
 		default:
 			System.out.println("S T A R T I N G   S E S S I O N");

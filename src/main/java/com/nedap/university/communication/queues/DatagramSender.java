@@ -5,7 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import header.HeaderParser;
 import time.TimeKeeper;
+import transferInformation.Metrics;
 
 public class DatagramSender {
 
@@ -13,16 +15,19 @@ public class DatagramSender {
 	private int port;
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
+	private Metrics metrics;
 
 	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		keeper = keeperArg;
+		metrics = new Metrics();
 	}
 
 	public void sendPacket(byte[] packet) {
 		try {
 			DatagramPacket datagram = new DatagramPacket(packet, packet.length, address, port);
 			socket.send(datagram);
+			metrics.updatePacketsSent(HeaderParser.getSequenceNumber(packet), packet.length);
 			keeper.setRetransmissionTimer(packet);
 		} catch (IOException e) {
 			System.out.println("Sender closed");
@@ -44,11 +49,16 @@ public class DatagramSender {
 		address = addressArg;
 	}
 
+	public Metrics getMetrics() {
+		return metrics;
+	}
+
 	public void toPauseTimer(boolean toPause) {
 		keeper.pauseRetransmissionTimer(toPause);
 	}
 
 	public void close() {
+		System.out.println(metrics.toString());
 		socket.close();
 	}
 

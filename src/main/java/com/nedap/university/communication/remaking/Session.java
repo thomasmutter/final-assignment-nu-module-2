@@ -11,6 +11,7 @@ import otherCommands.PacketManager;
 import queues.DatagramReceiver;
 import queues.DatagramSender;
 import time.TimeKeeper;
+import transferInformation.Metrics;
 
 public class Session {
 
@@ -72,6 +73,10 @@ public class Session {
 
 	public void shutdown() {
 		sender.close();
+	}
+
+	public Metrics getMetricsFromSender() {
+		return sender.getMetrics();
 	}
 
 	private byte[] stripBufferRemainder(DatagramPacket datagram) {

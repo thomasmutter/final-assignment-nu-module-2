@@ -1,47 +1,59 @@
 package transferInformation;
 
-import java.net.DatagramPacket;
-
-import header.HeaderParser;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Metrics {
 
-	private HeaderParser parser;
-
 	private long startTime;
 	private int packetsSent;
-	private int uniquePacketsSent;
-	private int packetsReceived;
-	private int uniquePacketsReceived;
+
+	private Set<Integer> uniquePacketsSent;
 
 	private double averagePacketLength;
 
 	public Metrics() {
 		startTime = System.currentTimeMillis();
-		parser = new HeaderParser();
+		uniquePacketsSent = new HashSet<>();
 	}
 
-	private double calculateUpSpeed() {
-		double speed = packetsSent * averagePacketLength / (System.currentTimeMillis() - startTime);
-		return speed;
+	private String calculateUpSpeed() {
+		double speed = 1e-3 * packetsSent * averagePacketLength / (System.currentTimeMillis() - startTime);
+		String speedString = String.format("The transfer speed is: %.2f MB/s", speed);
+		return speedString;
 	}
 
-	private double calculateDownSpeed() {
-		double speed = packetsReceived * averagePacketLength / (System.currentTimeMillis() - startTime);
-		return speed;
+//	private double calculateDownSpeed() {
+//		double speed = packetsReceived * averagePacketLength / (System.currentTimeMillis() - startTime);
+//		return speed;
+//	}
+
+	private String getTimePassed() {
+		long time = System.currentTimeMillis() - startTime;
+		long minutes = time / (60 * 1000);
+		long seconds = (time / 1000) % 60;
+		String timeString = String.format("Time passed: %d:%02d", minutes, seconds);
+		return timeString;
 	}
 
-	private long getTimePassed() {
-		return System.currentTimeMillis() - startTime;
+	private String lostPackets() {
+		int lostPackets = packetsSent - uniquePacketsSent.size();
+		double percentage = 100 * lostPackets / packetsSent;
+		String lostString = String.format("The package loss percentage is: %.1f%%", percentage);
+		return lostString;
 	}
 
-	private void updateUniquePackets() {
-
+	public void updatePacketsSent(int packetId, int size) {
+		packetsSent++;
+		averagePacketLength = averagePacketLength + size / packetsSent;
+		if (!uniquePacketsSent.contains(packetId)) {
+			uniquePacketsSent.add(packetId);
+		}
 	}
 
-	public void getMetricsFromPacket(DatagramPacket data) {
-		packetsReceived++;
-
+	@Override
+	public String toString() {
+		return getTimePassed() + "\n" + calculateUpSpeed() + "\n" + lostPackets() + "\n";
 	}
 
 }
