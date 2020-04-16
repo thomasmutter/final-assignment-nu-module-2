@@ -3,6 +3,7 @@ package client;
 import java.util.Arrays;
 import java.util.List;
 
+import communicationProtocols.Protocol;
 import download.DownloadEstablished;
 import download.DownloadManager;
 import header.HeaderConstructor;
@@ -16,7 +17,6 @@ public class InputInterpreter {
 	private static final String PATH = "src/main/java/com/nedap/university/resources/";
 	private static List<String> commandList;
 
-	private HeaderConstructor header;
 	private String[] inputArray;
 	private Client client;
 
@@ -24,7 +24,6 @@ public class InputInterpreter {
 
 	public InputInterpreter(String input, Client clientArg) {
 		inputArray = input.split("\\s+");
-		header = new HeaderConstructor();
 		client = clientArg;
 		initializeCommandList();
 	}
@@ -47,10 +46,10 @@ public class InputInterpreter {
 
 	public PacketManager getPacketManagerFromInput(Session session) {
 		switch (getFlagsFromCommand(inputArray[0])) {
-		case HeaderConstructor.UL:
+		case Protocol.UL:
 			client.addSessionToMap(inputArray[1], session);
 			return new UploadManager(session, PATH + inputArray[1]);
-		case HeaderConstructor.DL:
+		case Protocol.DL:
 			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
 			manager.setManagerState(new DownloadEstablished(manager, offset));
 			client.addSessionToMap(inputArray[1], session);
@@ -69,7 +68,7 @@ public class InputInterpreter {
 		offset = ackNo;
 		int checksum = 0;
 		int windowSize = payloadSize;
-		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
 	}
 
 	private byte getFlagsFromCommand(String command) {

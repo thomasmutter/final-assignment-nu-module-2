@@ -1,62 +1,64 @@
 package header;
 
+import communicationProtocols.Protocol;
+
 public class HeaderParser {
 
-	public byte[] getHeader(byte[] datagram) {
-		byte[] header = new byte[HeaderConstructor.HEADERLENGTH];
-		for (int i = 0; i < HeaderConstructor.HEADERLENGTH; i++) {
+	public static byte[] getHeader(byte[] datagram) {
+		byte[] header = new byte[Protocol.HEADERLENGTH];
+		for (int i = 0; i < Protocol.HEADERLENGTH; i++) {
 			header[i] = datagram[i];
 		}
 		return header;
 	}
 
-	public byte[] getData(byte[] datagram) {
-		byte[] data = new byte[datagram.length - HeaderConstructor.HEADERLENGTH];
+	public static byte[] getData(byte[] datagram) {
+		byte[] data = new byte[datagram.length - Protocol.HEADERLENGTH];
 		int j = 0;
-		for (int i = HeaderConstructor.HEADERLENGTH; i < datagram.length; i++) {
+		for (int i = Protocol.HEADERLENGTH; i < datagram.length; i++) {
 			data[j] = datagram[i];
 			j++;
 		}
 		return data;
 	}
 
-	public byte[] trimEmptyData(byte[] datagram) {
-		byte[] data = new byte[HeaderConstructor.HEADERLENGTH + getWindowSize(datagram)];
+	public static byte[] trimEmptyData(byte[] datagram) {
+		byte[] data = new byte[Protocol.HEADERLENGTH + getWindowSize(datagram)];
 		for (int i = 0; i < data.length; i++) {
 			data[i] = datagram[i];
 		}
 		return data;
 	}
 
-	public int getChecksum(byte[] header) {
+	public static int getChecksum(byte[] header) {
 		int[] checksumBytes = getBytes(header, 12, 2);
 		return getIntFromByteArray(checksumBytes);
 	}
 
-	public int getWindowSize(byte[] header) {
+	public static int getWindowSize(byte[] header) {
 		int[] windowBytes = getBytes(header, 10, 2);
 		return getIntFromByteArray(windowBytes);
 	}
 
-	public int getSequenceNumber(byte[] header) {
+	public static int getSequenceNumber(byte[] header) {
 		int[] seqNoBytes = getBytes(header, 2, 4);
 		return getIntFromByteArray(seqNoBytes);
 	}
 
-	public int getAcknowledgementNumber(byte[] header) {
+	public static int getAcknowledgementNumber(byte[] header) {
 		int[] ackBytes = getBytes(header, 6, 4);
 		return getIntFromByteArray(ackBytes);
 	}
 
-	public int getCommand(byte[] header) {
+	public static int getCommand(byte[] header) {
 		return header[0];
 	}
 
-	public byte getStatus(byte[] header) {
+	public static byte getStatus(byte[] header) {
 		return header[1];
 	}
 
-	private int[] getBytes(byte[] header, int startIndex, int totalBytes) {
+	private static int[] getBytes(byte[] header, int startIndex, int totalBytes) {
 		int[] bytes = new int[totalBytes];
 		for (int i = 0; i < totalBytes; i++) {
 			bytes[i] = (((int) header[startIndex]) & 0xFF);
@@ -65,7 +67,7 @@ public class HeaderParser {
 		return bytes;
 	}
 
-	public int getIntFromByteArray(int[] array) {
+	public static int getIntFromByteArray(int[] array) {
 		int intValue = 0;
 		for (int i = 0; i < array.length; i++) {
 			// System.out.println("8bit: " + array[i]);

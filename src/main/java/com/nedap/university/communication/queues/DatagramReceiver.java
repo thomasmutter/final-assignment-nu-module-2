@@ -6,7 +6,6 @@ import java.net.DatagramSocket;
 import java.util.Random;
 
 import communicationProtocols.Protocol;
-import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
 import time.TimeKeeper;
@@ -16,13 +15,11 @@ public class DatagramReceiver implements Runnable {
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
 	private Session session;
-	private HeaderParser parser;
 
 	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
 		keeper = keeperArg;
-		parser = new HeaderParser();
 	}
 
 	@Override
@@ -58,10 +55,11 @@ public class DatagramReceiver implements Runnable {
 	}
 
 	private void printInformation(DatagramPacket receivedPacket) {
-		if (parser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
-				|| parser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
-			System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
-			System.out.println("Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+		if (HeaderParser.getCommand(receivedPacket.getData()) != Protocol.P
+				|| HeaderParser.getCommand(receivedPacket.getData()) != Protocol.R) {
+			System.out.println("Received packet with: " + HeaderParser.getSequenceNumber(receivedPacket.getData()));
+			System.out.println(
+					"Received packet with: " + HeaderParser.getAcknowledgementNumber(receivedPacket.getData()));
 		}
 	}
 

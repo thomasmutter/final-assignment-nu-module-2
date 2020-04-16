@@ -7,12 +7,7 @@ import header.HeaderConstructor;
 
 public class DataCheck {
 
-	private HeaderConstructor constructor;
 	private int totalBitPointer;
-
-	public DataCheck() {
-		constructor = new HeaderConstructor();
-	}
 
 	public static int getBitFromByteArray(int index, byte[] array) {
 		int bytePointer = index / 8;
@@ -64,7 +59,7 @@ public class DataCheck {
 
 	public byte[] appendCRC(byte[] file) {
 		int crc = calculateRemainder(file);
-		byte[] fileWithCRC = appendArrayToData(file, intToByte(constructor.getBytesFromInt(crc, 2)));
+		byte[] fileWithCRC = appendArrayToData(file, intToByte(HeaderConstructor.getBytesFromInt(crc, 2)));
 		return fileWithCRC;
 	}
 

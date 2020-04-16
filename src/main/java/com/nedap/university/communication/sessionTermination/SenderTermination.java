@@ -1,6 +1,6 @@
 package sessionTermination;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import otherCommands.CleanUpManager;
 import time.TimeKeeper;
 
@@ -19,9 +19,9 @@ public class SenderTermination implements Terminator {
 	public void terminateSession(byte status, int seqNo, int ackNo) {
 		if (FinSent) {
 			keeper.setFinTimer();
-			manager.sendFin((byte) (HeaderConstructor.ACK + HeaderConstructor.FIN), seqNo, ackNo);
+			manager.sendFin((byte) (Protocol.ACK + Protocol.FIN), seqNo, ackNo);
 		} else {
-			manager.sendFin(HeaderConstructor.FIN, seqNo, ackNo);
+			manager.sendFin(Protocol.FIN, seqNo, ackNo);
 			FinSent = true;
 		}
 	}

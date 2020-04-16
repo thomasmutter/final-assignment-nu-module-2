@@ -3,6 +3,7 @@ package otherCommands;
 import java.io.File;
 import java.util.Random;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
@@ -13,28 +14,24 @@ import time.TimeKeeper;
 public class ListManager implements PacketManager {
 
 	private Session session;
-	private HeaderConstructor headerConstructor;
-	private HeaderParser parser;
 	private static final String PATH = System.getProperty("user.dir") + File.separator;
 
 	public ListManager(Session sessionArg) {
 		session = sessionArg;
-		headerConstructor = new HeaderConstructor();
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		if (parser.getStatus(parser.getHeader(data)) != HeaderConstructor.ACK) {
+		if (HeaderParser.getStatus(HeaderParser.getHeader(data)) != Protocol.ACK) {
 			sendList(data);
 		} else {
-			shutdownSession(parser.getSequenceNumber(data), parser.getAcknowledgementNumber(data));
+			shutdownSession(HeaderParser.getSequenceNumber(data), HeaderParser.getAcknowledgementNumber(data));
 		}
 	}
 
 	private void sendList(byte[] data) {
 		byte[] payload = getBytesFromPath();
-		byte[] header = headerToSend(parser.getHeader(data), payload.length);
+		byte[] header = headerToSend(HeaderParser.getHeader(data), payload.length);
 
 		byte[] datagram = new byte[header.length + payload.length];
 
@@ -55,13 +52,13 @@ public class ListManager implements PacketManager {
 	}
 
 	public byte[] headerToSend(byte[] oldHeader, int payloadSize) {
-		byte flags = HeaderConstructor.LS;
-		byte status = HeaderConstructor.ACK;
+		byte flags = Protocol.LS;
+		byte status = Protocol.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
-		int ackNo = parser.getSequenceNumber(oldHeader);
+		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
 		int checksum = 0;
 		int windowSize = payloadSize;
-		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {
@@ -69,7 +66,7 @@ public class ListManager implements PacketManager {
 		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 
 }

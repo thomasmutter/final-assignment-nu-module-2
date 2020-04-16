@@ -2,6 +2,7 @@ package download;
 
 import java.util.Arrays;
 
+import communicationProtocols.Protocol;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
@@ -14,7 +15,6 @@ import sessionTermination.Terminator;
 public class DownloadManager implements PacketManager {
 
 	private ManagerState managerState;
-	private HeaderConstructor constructor;
 
 	private Session session;
 	private String path;
@@ -23,7 +23,6 @@ public class DownloadManager implements PacketManager {
 	public DownloadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;
 		path = pathArg;
-		constructor = new HeaderConstructor();
 		managerState = new DownloadInitialize(this);
 	}
 
@@ -43,12 +42,12 @@ public class DownloadManager implements PacketManager {
 	}
 
 	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
-		byte flags = HeaderConstructor.DL;
+		byte flags = Protocol.DL;
 		byte status = statusArg;
 
 		int checksum = 0;
 		int windowSize = payloadSize;
-		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 
 	private void finalizeFileTransfer() {
@@ -71,7 +70,7 @@ public class DownloadManager implements PacketManager {
 		Terminator terminator = new ReceiverTermination(cleanUp);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 
 }

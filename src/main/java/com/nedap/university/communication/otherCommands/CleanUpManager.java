@@ -1,5 +1,6 @@
 package otherCommands;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
@@ -7,29 +8,25 @@ import sessionTermination.Terminator;
 
 public class CleanUpManager implements PacketManager {
 
-	private HeaderConstructor constructor;
-	private HeaderParser parser;
 	private Session session;
 	private Terminator terminator;
 
 	public CleanUpManager(Session sessionArg) {
 		session = sessionArg;
-		constructor = new HeaderConstructor();
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		byte status = parser.getStatus(data);
-		int seqNo = parser.getSequenceNumber(data);
-		int ackNo = parser.getAcknowledgementNumber(data);
+		byte status = HeaderParser.getStatus(data);
+		int seqNo = HeaderParser.getSequenceNumber(data);
+		int ackNo = HeaderParser.getAcknowledgementNumber(data);
 		terminator.terminateSession(status, ackNo, seqNo);
 	}
 
 	public void sendFin(byte statusArg, int seqNo, int ackNo) {
 		String dataString = "FIN";
 		byte[] finDatagram = formHeader(statusArg, seqNo, ackNo);
-		if (statusArg == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
+		if (statusArg == (byte) (Protocol.FIN + Protocol.ACK)) {
 			dataString = dataString + " ACK";
 		}
 		byte[] payload = dataString.getBytes();
@@ -46,11 +43,11 @@ public class CleanUpManager implements PacketManager {
 	private byte[] formHeader(byte statusArg, int seqNoArg, int ackNoArg) {
 		byte flags = 0;
 		byte status = statusArg;
-		int seqNo = seqNoArg + HeaderConstructor.ACKSIZE;
+		int seqNo = seqNoArg + Protocol.ACKSIZE;
 		int ackNo = ackNoArg;
 		int checksum = 0;
 		int windowSize = 1;
-		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 
 	public void setTerminator(Terminator terminatorArg) {

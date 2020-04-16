@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import header.HeaderParser;
 import remaking.Session;
 
@@ -18,7 +18,6 @@ public class TimeKeeper {
 	private int finTimersSet;
 	private Map<Integer, byte[]> unAckedPackets;
 	private Session session;
-	private HeaderParser parser;
 	protected OwnTimer timer;
 	private Thread timerThread;
 
@@ -28,15 +27,14 @@ public class TimeKeeper {
 		session = sessionArg;
 		unAckedPackets = Collections.synchronizedMap(new HashMap<>());
 		initializeBlacklist();
-		parser = new HeaderParser();
 		initiateRetransmissionTimer();
 	}
 
 	private void initializeBlacklist() {
 		timerBlacklist = new ArrayList<>();
-		timerBlacklist.add(HeaderConstructor.FINACK);
-		timerBlacklist.add(HeaderConstructor.PAUSEACK);
-		timerBlacklist.add(HeaderConstructor.RESUMEACK);
+		timerBlacklist.add(Protocol.FINACK);
+		timerBlacklist.add(Protocol.PAUSEACK);
+		timerBlacklist.add(Protocol.RESUMEACK);
 	}
 
 	protected void initiateRetransmissionTimer() {
@@ -64,17 +62,9 @@ public class TimeKeeper {
 		timer.setPaused(isPaused);
 	}
 
-//	public void setRetransmissionTimer(byte[] datagram) {
-//		int sequenceNumber = parser.getSequenceNumber(parser.getHeader(datagram));
-//		// System.out.println("Timer set for datagram with seqNo: " + sequenceNumber);
-//		unAckedPackets.put(sequenceNumber, datagram);
-//		Timer timer = new Timer();
-//		timer.schedule(new RetransmissionTimer(this, sequenceNumber), TIMEOUT);
-//	}
-
 	public void setRetransmissionTimer(byte[] datagram) {
-		if (!timerBlacklist.contains(parser.getStatus(datagram))) {
-			int sequenceNumber = parser.getSequenceNumber(datagram);
+		if (!timerBlacklist.contains(HeaderParser.getStatus(datagram))) {
+			int sequenceNumber = HeaderParser.getSequenceNumber(datagram);
 			unAckedPackets.put(sequenceNumber, datagram);
 			timer.getTimerMap().put(System.currentTimeMillis(), sequenceNumber);
 		}
@@ -88,7 +78,7 @@ public class TimeKeeper {
 	}
 
 	public void processIncomingAck(byte[] datagram) {
-		int ackNumber = parser.getAcknowledgementNumber(parser.getHeader(datagram));
+		int ackNumber = HeaderParser.getAcknowledgementNumber(datagram);
 //		System.out.println("Datagram with sequenceNumber: " + ackNumber + " is acked");
 		unAckedPackets.remove(ackNumber);
 		timer.getTimerMap().values().remove(ackNumber);

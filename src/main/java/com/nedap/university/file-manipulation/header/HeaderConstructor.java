@@ -1,39 +1,12 @@
 package header;
 
+import communicationProtocols.Protocol;
+
 public class HeaderConstructor {
 
-	/**
-	 * Session state commands
-	 */
-	public static final byte DL = 1;
-	public static final byte UL = 2;
-	public static final byte RM = 4;
-	public static final byte RP = 8;
-	public static final byte LS = 16;
-
-	/**
-	 * Communication commands
-	 */
-	public static final byte ACK = 1;
-	public static final byte FIN = 2;
-	public static final byte P = 4;
-	public static final byte R = 8;
-
-	public static final byte PAUSEACK = ACK ^ P;
-	public static final byte RESUMEACK = ACK ^ R;
-	public static final byte FINACK = ACK ^ FIN;
-
-	/**
-	 * Standard payloadSize of acknowledgement messages
-	 */
-	public static final int ACKSIZE = 1;
-
-	public static final int HEADERLENGTH = 14;
-	private static final int NUMBERBYTES = 4;
-
-	public byte[] constructHeader(byte flags, byte status, int sequenceNumber, int acknowledgementNumber,
+	public static byte[] constructHeader(byte flags, byte status, int sequenceNumber, int acknowledgementNumber,
 			int windowSize, int checksum) {
-		byte[] header = new byte[HEADERLENGTH];
+		byte[] header = new byte[Protocol.HEADERLENGTH];
 
 		// Command flags - 1 byte
 		header[0] = flags;
@@ -42,11 +15,11 @@ public class HeaderConstructor {
 		header[1] = status;
 
 		// Sequence Number - 4 bytes
-		int[] sequenceNumberAsBytes = getBytesFromInt(sequenceNumber, NUMBERBYTES);
+		int[] sequenceNumberAsBytes = getBytesFromInt(sequenceNumber, Protocol.NUMBERBYTES);
 		header = addToHeader(header, sequenceNumberAsBytes, 2);
 
 		// Sequence Number - 4 bytes
-		int[] acknowledgementNumberAsBytes = getBytesFromInt(acknowledgementNumber, NUMBERBYTES);
+		int[] acknowledgementNumberAsBytes = getBytesFromInt(acknowledgementNumber, Protocol.NUMBERBYTES);
 		header = addToHeader(header, acknowledgementNumberAsBytes, 6);
 
 		// Window Size - 2 bytes
@@ -60,7 +33,7 @@ public class HeaderConstructor {
 		return header;
 	}
 
-	public int[] getBytesFromInt(int input, int totalBytes) {
+	public static int[] getBytesFromInt(int input, int totalBytes) {
 		// input = input % 500;
 		int[] inputAsBytes = new int[totalBytes];
 		inputAsBytes[0] = input >> 8 * (totalBytes - 1);
@@ -72,7 +45,7 @@ public class HeaderConstructor {
 		return inputAsBytes;
 	}
 
-	public byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
+	private static byte[] addToHeader(byte[] header, int[] inputArray, int startIndex) {
 		for (int i = 0; i < inputArray.length; i++) {
 			header[startIndex] = (byte) inputArray[i];
 			startIndex++;

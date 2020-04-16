@@ -5,7 +5,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import header.HeaderParser;
 import time.TimeKeeper;
 
 public class DatagramSender {
@@ -15,29 +14,27 @@ public class DatagramSender {
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
 
-	private HeaderParser parser;
-
 	public DatagramSender(DatagramSocket socketArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		keeper = keeperArg;
-		parser = new HeaderParser();
 	}
 
 	public void sendPacket(byte[] packet) {
 		try {
 			DatagramPacket datagram = new DatagramPacket(packet, packet.length, address, port);
 			socket.send(datagram);
+			keeper.setRetransmissionTimer(packet);
 		} catch (IOException e) {
 			System.out.println("Sender closed");
 		}
 	}
 
 //	private void printInformation(DatagramPacket receivedPacket) {
-//		if (parser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
-//				|| parser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
-//			System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
-//			System.out.println("Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
-//			System.out.println("This packet has windowSize " + parser.getWindowSize(receivedPacket.getData()));
+//		if (HeaderParser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
+//				|| HeaderParser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
+//			System.out.println("Received packet with: " + HeaderParser.getSequenceNumber(receivedPacket.getData()));
+//			System.out.println("Received packet with: " + HeaderParser.getAcknowledgementNumber(receivedPacket.getData()));
+//			System.out.println("This packet has windowSize " + HeaderParser.getWindowSize(receivedPacket.getData()));
 //			System.out.println("");
 //		}
 //	}

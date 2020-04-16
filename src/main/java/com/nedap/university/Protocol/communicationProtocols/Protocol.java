@@ -23,6 +23,35 @@ public class Protocol {
 	 */
 	public static final int TRIGGERLENGTH = 10;
 
+	/**
+	 * Session state commands
+	 */
+	public static final byte DL = 1;
+	public static final byte UL = 2;
+	public static final byte RM = 4;
+	public static final byte RP = 8;
+	public static final byte LS = 16;
+
+	/**
+	 * Communication commands
+	 */
+	public static final byte ACK = 1;
+	public static final byte FIN = 2;
+	public static final byte P = 4;
+	public static final byte R = 8;
+
+	public static final byte PAUSEACK = ACK ^ P;
+	public static final byte RESUMEACK = ACK ^ R;
+	public static final byte FINACK = ACK ^ FIN;
+
+	/**
+	 * Standard payloadSize of acknowledgement messages
+	 */
+	public static final int ACKSIZE = 1;
+
+	public static final int HEADERLENGTH = 14;
+	public static final int NUMBERBYTES = 4;
+
 	public static byte[] buildTrigger(byte status) {
 		byte[] trigger = new byte[10];
 		Random random = new Random();

@@ -1,5 +1,6 @@
 package upload;
 
+import communicationProtocols.Protocol;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
@@ -14,13 +15,11 @@ public class UploadManager implements PacketManager {
 
 	private Session session;
 	private ManagerState state;
-	private HeaderConstructor constructor;
 
 	private byte[] fileAsBytes;
 
 	public UploadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;
-		constructor = new HeaderConstructor();
 		state = new UploadInitialize(this, pathArg);
 	}
 
@@ -37,12 +36,12 @@ public class UploadManager implements PacketManager {
 	}
 
 	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
-		byte flags = HeaderConstructor.UL;
+		byte flags = Protocol.UL;
 		byte status = statusArg;
 
 		int checksum = 0;
 		int windowSize = payloadSize;
-		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
 	}
 
 	public void setManagerState(ManagerState stateArg) {
@@ -72,6 +71,6 @@ public class UploadManager implements PacketManager {
 		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 }
