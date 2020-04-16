@@ -5,9 +5,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Random;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import time.TimeKeeper;
 
 public class DatagramReceiver implements Runnable {
@@ -15,37 +15,35 @@ public class DatagramReceiver implements Runnable {
 	private DatagramSocket socket;
 	private TimeKeeper keeper;
 	private Session session;
-	private HeaderParser parser;
+	private Random random;
 
 	public DatagramReceiver(DatagramSocket socketArg, Session sessionArg, TimeKeeper keeperArg) {
 		socket = socketArg;
 		session = sessionArg;
 		keeper = keeperArg;
-		parser = new HeaderParser();
+		random = new Random();
 	}
 
 	@Override
 	public void run() {
 		try {
 			DatagramPacket firstPacket = receiveDatagram();
-			keeper.processIncomingAck(firstPacket.getData());
 			session.setUpContact(firstPacket.getAddress(), firstPacket.getPort());
+			System.out.println("-- SET UP NEW CONTACT INFO AT " + firstPacket.getPort());
+			keeper.processIncomingAck(firstPacket.getData());
+			session.giveDatagramToManager(firstPacket);
+//			printInformation(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
-				Random random = new Random();
+
 				if (random.nextInt(100) < 100) {
 //					printInformation(receivedPacket);
 					keeper.processIncomingAck(receivedPacket.getData());
 					session.giveDatagramToManager(receivedPacket);
-				} else {
-					// System.out.println("----- PACKET LOSS ------");
-//					try {
-//						Thread.sleep(2000);
-//					} catch (InterruptedException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
 				}
+//				else {
+//					System.out.println("----- PACKET LOSS ------");
+//				}
 			}
 		} catch (IOException e) {
 			System.out.println("Reader closed");
@@ -54,15 +52,16 @@ public class DatagramReceiver implements Runnable {
 	}
 
 	private void printInformation(DatagramPacket receivedPacket) {
-		if (parser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
-				|| parser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
-			System.out.println("Received packet with: " + parser.getSequenceNumber(receivedPacket.getData()));
-			System.out.println("Received packet with: " + parser.getAcknowledgementNumber(receivedPacket.getData()));
+		if (HeaderParser.getCommand(receivedPacket.getData()) != Protocol.P
+				|| HeaderParser.getCommand(receivedPacket.getData()) != Protocol.R) {
+			System.out.println("Received packet with: " + HeaderParser.getSequenceNumber(receivedPacket.getData()));
+			System.out.println(
+					"Received packet with: " + HeaderParser.getAcknowledgementNumber(receivedPacket.getData()));
 		}
 	}
 
 	private DatagramPacket receiveDatagram() throws IOException {
-		byte[] buffer = new byte[512];
+		byte[] buffer = new byte[Protocol.PACKETSIZE + 2];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
 		socket.receive(incomingDatagram);
 //		System.out.println("Receiving succesfull");

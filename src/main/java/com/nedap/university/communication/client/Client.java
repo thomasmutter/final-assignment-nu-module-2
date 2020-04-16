@@ -1,5 +1,6 @@
 package client;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -10,7 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import communicationProtocols.Protocol;
-import remaking.Session;
+import session.Session;
+import transferInformation.Metrics;
 
 public class Client {
 
@@ -24,8 +26,12 @@ public class Client {
 		sessionMap = new HashMap<>();
 	}
 
-	public void addSessionToMap(String fileName, Session session) {
-		sessionMap.put(fileName, session);
+	public void addSessionToMap(String command, Session session) {
+		String[] split = command.split("\\s+");
+		if (split.length > 1) {
+			System.out.println("SESSION ADDED TO MAP");
+			sessionMap.put(split[1], session);
+		}
 	}
 
 	public void pauseSession(String fileName) {
@@ -38,6 +44,11 @@ public class Client {
 		sessionToResume.resume();
 	}
 
+	public Metrics getMetricsFromSession(String fileName) {
+		Session session = sessionMap.get(fileName);
+		return session.getMetricsFromSender();
+	}
+
 	private void lookForServer() throws IOException {
 		socketConfig();
 		sendBroadcast();
@@ -45,8 +56,9 @@ public class Client {
 		DatagramPacket signOfLife = new DatagramPacket(buffer, buffer.length);
 		while (signOfLife.getLength() > Protocol.SIGNOFLIFESIZE) {
 			try {
-				System.out.println("RECEIVING");
 				socket.receive(signOfLife);
+				System.out.println("Server found");
+				System.out.println("-----------------------------------");
 			} catch (SocketTimeoutException e) {
 				System.out.println("The broadcast message has timed out, sending a new one.");
 				sendBroadcast();
@@ -55,7 +67,6 @@ public class Client {
 		}
 		serverAddress = signOfLife.getAddress();
 		InputListener listener = new InputListener(this);
-		System.out.println("_-----------STARTING NEW LISTNER-----------");
 		new Thread(listener).start();
 	}
 
@@ -69,6 +80,7 @@ public class Client {
 		InetAddress address = InetAddress.getByName(Protocol.BROADCAST);
 
 		System.out.println("Looking for server");
+		System.out.println("");
 		DatagramPacket contactDatagram = new DatagramPacket(contactRequest, contactRequest.length, address,
 				Protocol.PORT);
 		socket.send(contactDatagram);
@@ -78,12 +90,17 @@ public class Client {
 	public void startSession(String command) throws SocketException {
 //		String command = tui.getCommand();
 
-		Session session = null;
-		session = new Session();
+		Session session = new Session();
 
-		InputInterpreter input = new InputInterpreter(command, this);
-		byte[] inputDatagram = input.getDatagramFromInput();
-		session.setManager(input.getPacketManagerFromInput(session));
+		InputInterpreter input = new InputInterpreter(command);
+		addSessionToMap(command, session);
+		byte[] inputDatagram = null;
+		try {
+			inputDatagram = input.setUpSession(session);
+		} catch (FileNotFoundException e) {
+			System.out.println("File does not exist. Please try another command");
+			return;
+		}
 		System.out.println("Address: " + serverAddress);
 		session.setUpContact(serverAddress, Protocol.PORT);
 		session.addToSendQueue(inputDatagram);

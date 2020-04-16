@@ -1,17 +1,13 @@
 package dataIntegrity;
 
+import java.util.Arrays;
+
 import communicationProtocols.Protocol;
-import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 
 public class DataCheck {
 
-	public HeaderConstructor constructor;
 	private int totalBitPointer;
-
-	public DataCheck() {
-		constructor = new HeaderConstructor();
-	}
 
 	public static int getBitFromByteArray(int index, byte[] array) {
 		int bytePointer = index / 8;
@@ -37,9 +33,6 @@ public class DataCheck {
 
 	public int calculateRemainder(byte[] file) {
 		file = appendArrayToData(file, new byte[] { 0, 0 });
-		// totalBitPointer = Integer.numberOfLeadingZeros(file[0]) - 24;
-//		System.out.println(Integer.toBinaryString(file[0]));
-//		System.out.println(totalBitPointer);
 		int remainder = shiftByBits(0, file);
 		while (totalBitPointer < file.length * 8) {
 			remainder ^= Protocol.CRCPOLYNOMIAL;
@@ -66,21 +59,18 @@ public class DataCheck {
 
 	public byte[] appendCRC(byte[] file) {
 		int crc = calculateRemainder(file);
-		byte[] fileWithCRC = appendArrayToData(file, intToByte(constructor.getBytesFromInt(crc, 2)));
+		byte[] fileWithCRC = appendArrayToData(file, intToByte(HeaderConstructor.getBytesFromInt(crc, 2)));
 		return fileWithCRC;
+	}
+
+	public byte[] stripCRCbits(byte[] file) {
+		int totalCRCBits = Integer.numberOfLeadingZeros(Protocol.CRCPOLYNOMIAL);
+		byte[] originalFile = Arrays.copyOf(file, file.length - totalCRCBits / 8);
+		return originalFile;
 	}
 
 	private int log2(int value) {
 		return Integer.SIZE - Integer.numberOfLeadingZeros(value);
-	}
-
-	public static void main(String[] args) {
-		ConversionHandler handler = new ConversionHandler();
-		DataCheck checksum = new DataCheck();
-		byte[] file = handler.readFileToBytes("medium.pdf");
-		file[0] = 1;
-		System.out.println(checksum.calculateRemainder(file));
-		System.out.println(checksum.calculateRemainder(checksum.appendCRC(file)));
 	}
 
 }

@@ -1,28 +1,30 @@
 package upload;
 
+import java.io.FileNotFoundException;
+
+import communicationProtocols.Protocol;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
 import managerStates.ManagerState;
 import otherCommands.CleanUpManager;
 import otherCommands.PacketManager;
-import remaking.Session;
+import session.Session;
 import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
-import time.TimeKeeper;
 
 public class UploadManager implements PacketManager {
 
 	private Session session;
 	private ManagerState state;
-	private HeaderConstructor constructor;
 
 	private byte[] fileAsBytes;
-	public static final int SIZE = 512;
+	private int fileSize;
 
-	public UploadManager(Session sessionArg, String pathArg) {
+	public UploadManager(Session sessionArg, String pathArg) throws FileNotFoundException {
 		session = sessionArg;
-		constructor = new HeaderConstructor();
-		state = new UploadInitialize(this, pathArg);
+		state = new UploadInitialize(this);
+		fileSize = fetchFileFromDisk(pathArg);
+
 	}
 
 	@Override
@@ -37,20 +39,22 @@ public class UploadManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
-		byte flags = HeaderConstructor.UL;
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int offsetArg) {
+		byte flags = Protocol.UL;
 		byte status = statusArg;
-
-		int checksum = 0;
-		int windowSize = payloadSize;
-		return constructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int offset = offsetArg;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
 	}
 
 	public void setManagerState(ManagerState stateArg) {
 		state = stateArg;
 	}
 
-	public int fetchFileFromDisk(String path) {
+	public int getFileSize() {
+		return fileSize;
+	}
+
+	public int fetchFileFromDisk(String path) throws FileNotFoundException {
 		ConversionHandler fileToByteConverter = new ConversionHandler();
 		fileAsBytes = fileToByteConverter.readFileToBytes(path);
 		return fileAsBytes.length;
@@ -70,9 +74,9 @@ public class UploadManager implements PacketManager {
 
 	public void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
-		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
+		Terminator terminator = new SenderTermination(cleanUp, session);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 }

@@ -1,35 +1,41 @@
 package otherCommands;
 
+import java.io.FileNotFoundException;
+
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import sessionTermination.ReceiverTermination;
+import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
 import upload.UploadManager;
 
 public class ReadDataManager implements PacketManager {
 
 	private Session session;
-	private HeaderConstructor headerConstructor;
-	private HeaderParser parser;
 
 	public ReadDataManager(Session sessionArg) {
 		session = sessionArg;
-		headerConstructor = new HeaderConstructor();
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		if (parser.getCommand(data) == HeaderConstructor.RP) {
-			System.out.println(getDataAsString(data).length());
-			UploadManager upload = new UploadManager(session,
-					"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
+		if (HeaderParser.getCommand(data) == Protocol.RP) {
+			UploadManager upload = null;
+			try {
+				upload = new UploadManager(session,
+						"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
+			} catch (FileNotFoundException e) {
+				System.out.println("File not found. Please try another command");
+				new SenderTermination(new CleanUpManager(session), session).terminateSession(Protocol.FIN, 0, 0);
+				return;
+			}
 			session.setManager(upload);
 			System.out.println("GOING TO UPLOAD");
 			upload.processIncomingData(data);
-		} else if (parser.getStatus(data) == HeaderConstructor.FIN) {
-			shutdownSession(parser.getSequenceNumber(data), parser.getAcknowledgementNumber(data));
+		} else if (HeaderParser.getStatus(data) == Protocol.FIN) {
+			shutdownSession(HeaderParser.getSequenceNumber(data), HeaderParser.getAcknowledgementNumber(data));
 			return;
 		} else {
 			System.out.println(getDataAsString(data));
@@ -38,16 +44,16 @@ public class ReadDataManager implements PacketManager {
 	}
 
 	private void sendAck(byte[] data) {
-		byte[] header = headerToSend(parser.getHeader(data));
+		byte[] header = headerToSend(HeaderParser.getHeader(data));
 		byte[] datagram = new byte[header.length];
 		System.arraycopy(header, 0, datagram, 0, header.length);
 		session.addToSendQueue(datagram);
 	}
 
 	private String getDataAsString(byte[] datagram) {
-		byte[] data = new byte[datagram.length - HeaderConstructor.HEADERLENGTH];
+		byte[] data = new byte[datagram.length - Protocol.HEADERLENGTH];
 		int j = 0;
-		for (int i = HeaderConstructor.HEADERLENGTH; i < datagram.length; i++) {
+		for (int i = Protocol.HEADERLENGTH; i < datagram.length; i++) {
 			data[j] = datagram[i];
 			j++;
 		}
@@ -55,14 +61,13 @@ public class ReadDataManager implements PacketManager {
 	}
 
 	public byte[] headerToSend(byte[] oldHeader) {
-		byte flags = HeaderConstructor.LS;
-		byte status = HeaderConstructor.ACK;
-		int seqNo = parser.getAcknowledgementNumber(oldHeader) + 1;
+		byte flags = Protocol.LS;
+		byte status = Protocol.ACK;
+		int seqNo = HeaderParser.getAcknowledgementNumber(oldHeader) + 1;
 //		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = parser.getSequenceNumber(oldHeader);
-		int checksum = 0;
-		int windowSize = 0;
-		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
+		int offset = 0;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {
@@ -70,7 +75,7 @@ public class ReadDataManager implements PacketManager {
 		Terminator terminator = new ReceiverTermination(cleanUp);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 
 }

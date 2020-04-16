@@ -1,30 +1,36 @@
 package download;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import header.HeaderParser;
 import managerStates.ManagerState;
 
 public class DownloadInitialize implements ManagerState {
 
 	private DownloadManager manager;
-	private HeaderParser parser;
 
 	public DownloadInitialize(DownloadManager managerArg) {
 		manager = managerArg;
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
-		int seqNo = parser.getAcknowledgementNumber(incomingDatagram);
-		int ackNo = parser.getSequenceNumber(incomingDatagram);
-		byte[] ackDatagram = manager.formHeader(HeaderConstructor.ACK, seqNo, ackNo, HeaderConstructor.ACKSIZE);
-		manager.processOutgoingData(ackDatagram);
-		nextState(ackNo);
+		int seqNo = HeaderParser.getAcknowledgementNumber(incomingDatagram);
+		int ackNo = HeaderParser.getSequenceNumber(incomingDatagram);
+		int offset = HeaderParser.getOffset(incomingDatagram);
+		if (HeaderParser.getStatus(incomingDatagram) != Protocol.FIN) {
+			byte[] ackDatagram = manager.formHeader(Protocol.ACK, seqNo + Protocol.ACKSIZE, ackNo, Protocol.ACKSIZE);
+			manager.initiateFileArray(offset);
+			System.out.println("File array initialized");
+			nextState();
+			manager.processOutgoingData(ackDatagram);
+		} else {
+			System.out.println("File does not exist, please try a different command");
+			manager.shutdownSession(0, 0);
+		}
 	}
 
-	private void nextState(int offset) {
-		manager.setManagerState(new DownloadEstablished(manager, offset));
+	private void nextState() {
+		manager.setManagerState(new DownloadEstablished(manager));
 	}
 
 }

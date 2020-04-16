@@ -1,42 +1,39 @@
 package client;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
-import download.DownloadEstablished;
+import communicationProtocols.Protocol;
 import download.DownloadManager;
 import header.HeaderConstructor;
-import otherCommands.PacketManager;
 import otherCommands.ReadDataManager;
-import remaking.Session;
+import session.Session;
+import upload.UploadEstablished;
 import upload.UploadManager;
+import upload.UploadWindow;
 
 public class InputInterpreter {
 
-	private static final String PATH = "src/main/java/com/nedap/university/resources/";
+	private static final String PATH = System.getProperty("user.dir");
 	private static List<String> commandList;
 
-	private HeaderConstructor header;
 	private String[] inputArray;
-	private Client client;
 
-	private int offset;
-
-	public InputInterpreter(String input, Client clientArg) {
+	public InputInterpreter(String input) {
 		inputArray = input.split("\\s+");
-		header = new HeaderConstructor();
-		client = clientArg;
 		initializeCommandList();
 	}
 
-	public byte[] getDatagramFromInput() {
+	private byte[] getDatagramFromInput(int offset) {
 		byte[] data;
 		if (inputArray.length > 1) {
 			data = inputArray[1].getBytes();
 		} else {
 			data = new byte[1];
 		}
-		byte[] header = formHeader(inputArray[0], data.length);
+		byte[] header = formHeader(inputArray[0], offset);
 
 		byte[] datagram = new byte[header.length + data.length];
 
@@ -45,31 +42,31 @@ public class InputInterpreter {
 		return datagram;
 	}
 
-	public PacketManager getPacketManagerFromInput(Session session) {
+	public byte[] setUpSession(Session session) throws FileNotFoundException {
 		switch (getFlagsFromCommand(inputArray[0])) {
-		case HeaderConstructor.UL:
-			client.addSessionToMap(inputArray[1], session);
-			return new UploadManager(session, PATH + inputArray[1]);
-		case HeaderConstructor.DL:
-			DownloadManager manager = new DownloadManager(session, PATH + inputArray[1]);
-			manager.setManagerState(new DownloadEstablished(manager, offset));
-			client.addSessionToMap(inputArray[1], session);
-			return manager;
+		case Protocol.UL:
+			UploadManager uploadManager = new UploadManager(session, PATH + File.separator + inputArray[1]);
+			uploadManager.setManagerState(new UploadEstablished(uploadManager, new UploadWindow()));
+			session.setManager(uploadManager);
+			return getDatagramFromInput(uploadManager.getFileSize());
+		case Protocol.DL:
+			DownloadManager downloadManager = new DownloadManager(session, PATH + File.separator + inputArray[1]);
+			session.setManager(downloadManager);
+			return getDatagramFromInput(0);
 		default:
-			return new ReadDataManager(session);
+			session.setManager(new ReadDataManager(session));
+			return getDatagramFromInput(0);
 		}
 	}
 
-	private byte[] formHeader(String command, int payloadSize) {
+	private byte[] formHeader(String command, int offsetArg) {
 		byte flagsToSend = getFlagsFromCommand(command);
 		byte status = 0;
 		int seqNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
-		offset = ackNo;
-		int checksum = 0;
-		int windowSize = payloadSize;
-		return header.constructHeader(flagsToSend, status, seqNo, ackNo, windowSize, checksum);
+		int offset = offsetArg;
+		return HeaderConstructor.constructHeader(flagsToSend, status, seqNo, ackNo, offset);
 	}
 
 	private byte getFlagsFromCommand(String command) {

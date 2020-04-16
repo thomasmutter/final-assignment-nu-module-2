@@ -1,6 +1,6 @@
 package sessionTermination;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import otherCommands.CleanUpManager;
 
 public class ReceiverTermination implements Terminator {
@@ -14,10 +14,10 @@ public class ReceiverTermination implements Terminator {
 
 	@Override
 	public void terminateSession(byte status, int seqNo, int ackNo) {
-		if (FinSent && status == (byte) (HeaderConstructor.FIN + HeaderConstructor.ACK)) {
+		if (FinSent && (status == Protocol.FINACK)) {
 			manager.shutdownSession();
-		} else {
-			manager.sendFin(HeaderConstructor.FIN, seqNo, ackNo);
+		} else if (status == Protocol.FIN) {
+			manager.sendFin(Protocol.FIN, seqNo, ackNo);
 			FinSent = true;
 		}
 

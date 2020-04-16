@@ -3,7 +3,7 @@ package timerTest;
 import java.util.HashMap;
 import java.util.Map;
 
-import remaking.Session;
+import session.Session;
 import time.OwnTimer;
 import time.TimeKeeper;
 

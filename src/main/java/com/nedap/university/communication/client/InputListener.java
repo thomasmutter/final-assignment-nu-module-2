@@ -19,6 +19,7 @@ public class InputListener implements Runnable {
 
 	@Override
 	public void run() {
+		printMenu();
 		String input = readMessage();
 		while (cont) {
 			try {
@@ -37,7 +38,6 @@ public class InputListener implements Runnable {
 		} catch (IOException e) {
 			System.out.println("Listener closed");
 		}
-
 		return input;
 	}
 
@@ -60,13 +60,29 @@ public class InputListener implements Runnable {
 			in.close();
 			break;
 		case "stats":
-			System.out.println("NICE STATS MAN");
+			System.out.println(client.getMetricsFromSession(fileName).toString());
 			break;
+		case "menu":
+			printMenu();
 		default:
 			System.out.println("S T A R T I N G   S E S S I O N");
 			client.startSession(input);
 			break;
 		}
+	}
+
+	private void printMenu() {
+		System.out.println("File transfer commands: ");
+		System.out.println("Download: dl + <name>");
+		System.out.println("Upload: ul + <name>");
+		System.out.println("Remove: rm + <name>");
+		System.out.println("Replace: rp + <name>");
+		System.out.println("List available files: ls");
+		System.out.println("Pause: p + <name>");
+		System.out.println("Resume: r+ <name>");
+		System.out.println("Quit: close");
+
+		System.out.println("To see metrics during your upload or download: stats + <name>");
 	}
 
 }

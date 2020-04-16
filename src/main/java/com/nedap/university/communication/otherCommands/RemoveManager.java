@@ -2,46 +2,41 @@ package otherCommands;
 
 import java.io.File;
 
-import download.DownloadEstablished;
+import communicationProtocols.Protocol;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import header.HeaderParser;
-import remaking.Session;
+import session.Session;
 import sessionTermination.SenderTermination;
 import sessionTermination.Terminator;
-import time.TimeKeeper;
 
 public class RemoveManager implements PacketManager {
 
 	private Session session;
-	private HeaderConstructor headerConstructor;
-	private HeaderParser parser;
-	private static final String PATH = "test-folder";
+	private static final String PATH = System.getProperty("user.dir");
 
 	public RemoveManager(Session sessionArg) {
 		session = sessionArg;
-		headerConstructor = new HeaderConstructor();
-		parser = new HeaderParser();
 	}
 
 	@Override
 	public void processIncomingData(byte[] data) {
-		if (parser.getStatus(data) != HeaderConstructor.ACK) {
+		if (HeaderParser.getStatus(data) != Protocol.ACK) {
 			removeOrReplace(data);
 		} else {
-			shutdownSession(parser.getSequenceNumber(data), parser.getAcknowledgementNumber(data));
+			shutdownSession(HeaderParser.getSequenceNumber(data), HeaderParser.getAcknowledgementNumber(data));
 		}
 	}
 
 	private void removeOrReplace(byte[] data) {
 		String path = getFileNameFromDatagram(data);
 		removeFile(path);
-		if (parser.getCommand(data) == HeaderConstructor.RP) {
+		if (HeaderParser.getCommand(data) == Protocol.RP) {
 			System.out.println("---- REPLACING ---- ");
 			setUpDownloadAfterRemove(PATH + File.separator + path, data);
-			session.addToSendQueue(prepareDatagramToSend(HeaderConstructor.RP, data));
+			session.addToSendQueue(prepareDatagramToSend(Protocol.RP, data));
 		} else {
-			session.addToSendQueue(prepareDatagramToSend(HeaderConstructor.RM, data));
+			session.addToSendQueue(prepareDatagramToSend(Protocol.RM, data));
 		}
 
 	}
@@ -49,7 +44,7 @@ public class RemoveManager implements PacketManager {
 	private byte[] prepareDatagramToSend(byte status, byte[] data) {
 		byte[] header = headerToSend(status, data);
 		byte[] payload = getFileNameFromDatagram(data).getBytes();
-		byte[] datagram = new byte[payload.length + HeaderConstructor.HEADERLENGTH];
+		byte[] datagram = new byte[payload.length + Protocol.HEADERLENGTH];
 		System.out.println("length of payload: " + payload.length);
 		System.arraycopy(header, 0, datagram, 0, header.length);
 		System.arraycopy(payload, 0, datagram, header.length, payload.length);
@@ -61,12 +56,12 @@ public class RemoveManager implements PacketManager {
 	private void setUpDownloadAfterRemove(String path, byte[] data) {
 		DownloadManager download = new DownloadManager(session, path);
 		session.setManager(download);
-		download.setManagerState(new DownloadEstablished(download, parser.getSequenceNumber(data)));
+//		download.setManagerState(new DownloadEstablished(download));
 //		download.processIncomingData(data);
 	}
 
 	private String getFileNameFromDatagram(byte[] data) {
-		byte[] payload = parser.getData(data);
+		byte[] payload = HeaderParser.getData(data);
 		return new String(payload);
 	}
 
@@ -84,22 +79,21 @@ public class RemoveManager implements PacketManager {
 
 	private byte[] headerToSend(byte command, byte[] oldHeader) {
 		byte flags = command;
-		byte status = HeaderConstructor.ACK;
+		byte status = Protocol.ACK;
 		int seqNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
-		int ackNo = parser.getSequenceNumber(oldHeader);
-		int checksum = 0;
-		int windowSize = 1;
+		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
+		int offset = 0;
 //		System.out.println("The payload size is: " + windowSize);
-		return headerConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, 0);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {
 		CleanUpManager cleanUp = new CleanUpManager(session);
-		Terminator terminator = new SenderTermination(cleanUp, new TimeKeeper(session));
+		Terminator terminator = new SenderTermination(cleanUp, session);
 		session.setManager(cleanUp);
 		cleanUp.setTerminator(terminator);
-		terminator.terminateSession(HeaderConstructor.FIN, seqNo, ackNo);
+		terminator.terminateSession(Protocol.FIN, seqNo, ackNo);
 	}
 
 }

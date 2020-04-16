@@ -1,8 +1,8 @@
 package upload;
 
-import header.HeaderConstructor;
+import communicationProtocols.Protocol;
 import managerStates.ManagerState;
-import remaking.Paused;
+import session.Paused;
 
 public class UploadPaused extends Paused implements ManagerState {
 
@@ -28,7 +28,7 @@ public class UploadPaused extends Paused implements ManagerState {
 
 	@Override
 	protected void sendMessage(byte status, int seqNo, int ackNo) {
-		byte[] ack = manager.formHeader(status, seqNo, ackNo, HeaderConstructor.ACKSIZE);
+		byte[] ack = manager.formHeader(status, seqNo, ackNo, Protocol.ACKSIZE);
 		manager.processOutgoingData(ack, new byte[] { 0 });
 
 	}

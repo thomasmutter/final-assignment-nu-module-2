@@ -2,7 +2,7 @@ package timerTest;
 
 import java.net.SocketException;
 
-import remaking.Session;
+import session.Session;
 
 public class MockSession extends Session {
 
