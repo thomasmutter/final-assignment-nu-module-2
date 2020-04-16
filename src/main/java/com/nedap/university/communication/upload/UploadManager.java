@@ -17,7 +17,6 @@ public class UploadManager implements PacketManager {
 	private HeaderConstructor constructor;
 
 	private byte[] fileAsBytes;
-	public static final int SIZE = 512;
 
 	public UploadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;

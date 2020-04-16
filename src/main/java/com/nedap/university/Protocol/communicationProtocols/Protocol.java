@@ -8,6 +8,8 @@ public class Protocol {
 	public static final String BROADCAST = "255.255.255.255";
 	public static final int SIGNOFLIFESIZE = 1;
 
+	public static final int PACKETSIZE = 512;
+
 	/**
 	 * This integer represents a polynomial that is used for the computation of the
 	 * crc value of data. This is a polynomial of order 17 (yielding a 16 bit

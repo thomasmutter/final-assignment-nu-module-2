@@ -15,7 +15,7 @@ public class ListManager implements PacketManager {
 	private Session session;
 	private HeaderConstructor headerConstructor;
 	private HeaderParser parser;
-	private static final String PATH = "src/main/java/com/nedap/university/resources";
+	private static final String PATH = System.getProperty("user.dir") + File.separator;
 
 	public ListManager(Session sessionArg) {
 		session = sessionArg;

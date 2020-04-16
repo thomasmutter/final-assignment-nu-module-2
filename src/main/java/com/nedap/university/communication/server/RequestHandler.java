@@ -13,7 +13,7 @@ import upload.UploadManager;
 
 public class RequestHandler {
 
-	private static final String PATH = "test-folder";
+	private static final String PATH = System.getProperty("user.dir");
 	private HeaderParser parser;
 
 	public RequestHandler() {

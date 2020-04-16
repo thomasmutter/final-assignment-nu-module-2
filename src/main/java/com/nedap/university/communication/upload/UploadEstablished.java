@@ -1,5 +1,6 @@
 package upload;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import managerStates.ManagerState;
@@ -72,7 +73,7 @@ public class UploadEstablished implements ManagerState {
 	}
 
 	private int computePayloadSize() {
-		int payloadSize = Math.min(UploadManager.SIZE - HeaderConstructor.HEADERLENGTH, fileLength - filePointer);
+		int payloadSize = Math.min(Protocol.PACKETSIZE - HeaderConstructor.HEADERLENGTH, fileLength - filePointer);
 		return payloadSize;
 	}
 

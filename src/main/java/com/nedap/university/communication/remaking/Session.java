@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 
 import communicationProtocols.Protocol;
+import dataIntegrity.DataCheck;
 import header.HeaderConstructor;
 import otherCommands.PacketManager;
 import queues.DatagramReceiver;
@@ -17,8 +18,10 @@ public class Session {
 	private PacketManager manager;
 	private DatagramSender sender;
 	private DatagramReceiver receiver;
+	private DataCheck checksum;
 
 	public Session() throws SocketException {
+		checksum = new DataCheck();
 		initialize();
 	}
 
@@ -36,6 +39,7 @@ public class Session {
 	}
 
 	public void addToSendQueue(byte[] packet) {
+		packet = checksum.appendCRC(packet);
 		DatagramPacket datagram = sender.wrapPacketInUDP(packet);
 		sender.addDatagramToQueue(datagram);
 	}
@@ -46,7 +50,13 @@ public class Session {
 
 	public void giveDatagramToManager(DatagramPacket datagram) {
 		byte[] data = stripBufferRemainder(datagram);
-		manager.processIncomingData(data);
+		int remainder = checksum.calculateRemainder(data);
+		if (remainder == 0) {
+			byte[] originalData = checksum.stripCRCbits(data);
+			manager.processIncomingData(originalData);
+		} else {
+			System.out.println("Datagram dropped, checksum invalid");
+		}
 	}
 
 	public void pause() {

@@ -16,7 +16,7 @@ public class RemoveManager implements PacketManager {
 	private Session session;
 	private HeaderConstructor headerConstructor;
 	private HeaderParser parser;
-	private static final String PATH = "test-folder";
+	private static final String PATH = System.getProperty("user.dir");
 
 	public RemoveManager(Session sessionArg) {
 		session = sessionArg;

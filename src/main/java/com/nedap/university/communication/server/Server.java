@@ -25,7 +25,7 @@ public class Server implements Runnable {
 	}
 
 	private DatagramPacket receiveRequest() throws IOException {
-		byte[] buffer = new byte[512];
+		byte[] buffer = new byte[Protocol.PACKETSIZE];
 		DatagramPacket sessionRequest = new DatagramPacket(buffer, buffer.length);
 		socket.receive(sessionRequest);
 

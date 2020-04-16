@@ -31,6 +31,12 @@ public class DatagramSender implements Runnable {
 	@Override
 	public void run() {
 		while (!socket.isClosed()) {
+//			try {
+//				Thread.sleep(1);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 			try {
 				DatagramPacket packetToSend = queue.take();
 				socket.send(packetToSend);

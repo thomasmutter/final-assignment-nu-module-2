@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.Random;
 
+import communicationProtocols.Protocol;
 import header.HeaderConstructor;
 import header.HeaderParser;
 import remaking.Session;
@@ -33,6 +34,12 @@ public class DatagramReceiver implements Runnable {
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
 				Random random = new Random();
+//				try {
+//					Thread.sleep(1);
+//				} catch (InterruptedException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
 				if (random.nextInt(100) < 100) {
 //					printInformation(receivedPacket);
 					keeper.processIncomingAck(receivedPacket.getData());
@@ -62,7 +69,7 @@ public class DatagramReceiver implements Runnable {
 	}
 
 	private DatagramPacket receiveDatagram() throws IOException {
-		byte[] buffer = new byte[512];
+		byte[] buffer = new byte[Protocol.PACKETSIZE + 2];
 		DatagramPacket incomingDatagram = new DatagramPacket(buffer, buffer.length);
 		socket.receive(incomingDatagram);
 //		System.out.println("Receiving succesfull");

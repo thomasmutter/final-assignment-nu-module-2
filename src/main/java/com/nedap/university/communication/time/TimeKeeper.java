@@ -82,7 +82,7 @@ public class TimeKeeper {
 
 	public void retransmit(int sequenceNumber) {
 		if (unAckedPackets.containsKey(sequenceNumber)) {
-//		System.out.println("Resending packet with seqNo " + sequenceNumber);
+			System.out.println("Resending packet with seqNo " + sequenceNumber);
 			session.addToSendQueue(unAckedPackets.get(sequenceNumber));
 		}
 	}

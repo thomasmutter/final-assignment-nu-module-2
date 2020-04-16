@@ -61,6 +61,7 @@ public class HeaderConstructor {
 	}
 
 	public int[] getBytesFromInt(int input, int totalBytes) {
+		// input = input % 500;
 		int[] inputAsBytes = new int[totalBytes];
 		inputAsBytes[0] = input >> 8 * (totalBytes - 1);
 		int remainder = input - (inputAsBytes[0] << (8 * (totalBytes - 1)));
