@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
+import communicationProtocols.Protocol;
 import header.HeaderParser;
 import time.TimeKeeper;
 import transferInformation.Metrics;
@@ -26,6 +27,7 @@ public class DatagramSender {
 	public void sendPacket(byte[] packet) {
 		try {
 			DatagramPacket datagram = new DatagramPacket(packet, packet.length, address, port);
+//			printInformation(datagram);
 			socket.send(datagram);
 			metrics.updatePacketsSent(HeaderParser.getSequenceNumber(packet), packet.length);
 			keeper.setRetransmissionTimer(packet);
@@ -34,15 +36,16 @@ public class DatagramSender {
 		}
 	}
 
-//	private void printInformation(DatagramPacket receivedPacket) {
-//		if (HeaderParser.getCommand(receivedPacket.getData()) != HeaderConstructor.P
-//				|| HeaderParser.getCommand(receivedPacket.getData()) != HeaderConstructor.R) {
-//			System.out.println("Received packet with: " + HeaderParser.getSequenceNumber(receivedPacket.getData()));
-//			System.out.println("Received packet with: " + HeaderParser.getAcknowledgementNumber(receivedPacket.getData()));
-//			System.out.println("This packet has windowSize " + HeaderParser.getWindowSize(receivedPacket.getData()));
-//			System.out.println("");
-//		}
-//	}
+	private void printInformation(DatagramPacket receivedPacket) {
+		if (HeaderParser.getCommand(receivedPacket.getData()) != Protocol.P
+				|| HeaderParser.getCommand(receivedPacket.getData()) != Protocol.R) {
+			System.out.println("Sending packet with seq: " + HeaderParser.getSequenceNumber(receivedPacket.getData()));
+			System.out.println(
+					"Sending packet with ack: " + HeaderParser.getAcknowledgementNumber(receivedPacket.getData()));
+			System.out.println("This packet has windowSize " + HeaderParser.getOffset(receivedPacket.getData()));
+			System.out.println("");
+		}
+	}
 
 	public void setContactInformation(int portArg, InetAddress addressArg) {
 		port = portArg;

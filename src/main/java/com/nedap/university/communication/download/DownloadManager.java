@@ -1,7 +1,5 @@
 package download;
 
-import java.util.Arrays;
-
 import communicationProtocols.Protocol;
 import fileConversion.ConversionHandler;
 import header.HeaderConstructor;
@@ -18,7 +16,7 @@ public class DownloadManager implements PacketManager {
 
 	private Session session;
 	private String path;
-	private byte[] fileAsBytes = new byte[0];
+	private byte[] fileAsBytes;
 
 	public DownloadManager(Session sessionArg, String pathArg) {
 		session = sessionArg;
@@ -35,19 +33,23 @@ public class DownloadManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	public void writeToByteArray(byte[] data) {
-		int oldLength = fileAsBytes.length;
-		fileAsBytes = Arrays.copyOf(fileAsBytes, fileAsBytes.length + data.length);
-		System.arraycopy(data, 0, fileAsBytes, oldLength, data.length);
+	public void writeToByteArray(byte[] data, int offset, int payload) {
+//		long start = System.currentTimeMillis();
+
+		System.arraycopy(data, 0, fileAsBytes, offset - payload, payload);
+//		System.out.println(System.currentTimeMillis() - start);
 	}
 
-	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int offsetArg) {
 		byte flags = Protocol.DL;
 		byte status = statusArg;
 
-		int checksum = 0;
-		int windowSize = payloadSize;
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int offset = offsetArg;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
+	}
+
+	public void initiateFileArray(int length) {
+		fileAsBytes = new byte[length];
 	}
 
 	private void finalizeFileTransfer() {

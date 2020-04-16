@@ -16,13 +16,16 @@ public class DownloadInitialize implements ManagerState {
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = HeaderParser.getAcknowledgementNumber(incomingDatagram);
 		int ackNo = HeaderParser.getSequenceNumber(incomingDatagram);
-		byte[] ackDatagram = manager.formHeader(Protocol.ACK, seqNo, ackNo, Protocol.ACKSIZE);
+		int offset = HeaderParser.getOffset(incomingDatagram);
+		byte[] ackDatagram = manager.formHeader(Protocol.ACK, seqNo + Protocol.ACKSIZE, ackNo, Protocol.ACKSIZE);
+		manager.initiateFileArray(offset);
+		System.out.println("File array initialized");
+		nextState();
 		manager.processOutgoingData(ackDatagram);
-		nextState(ackNo);
 	}
 
-	private void nextState(int offset) {
-		manager.setManagerState(new DownloadEstablished(manager, offset));
+	private void nextState() {
+		manager.setManagerState(new DownloadEstablished(manager));
 	}
 
 }

@@ -3,7 +3,6 @@ package queues;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.Random;
 
 import communicationProtocols.Protocol;
 import header.HeaderParser;
@@ -32,21 +31,21 @@ public class DatagramReceiver implements Runnable {
 //			printInformation(firstPacket);
 			while (!socket.isClosed()) {
 				DatagramPacket receivedPacket = receiveDatagram();
-				Random random = new Random();
+//				Random random = new Random();
 
-				if (random.nextInt(100) < 100) {
+//				if (random.nextInt(100) < 100) {
 //					printInformation(receivedPacket);
-					keeper.processIncomingAck(receivedPacket.getData());
-					session.giveDatagramToManager(receivedPacket);
-				} else {
-					// System.out.println("----- PACKET LOSS ------");
+				keeper.processIncomingAck(receivedPacket.getData());
+				session.giveDatagramToManager(receivedPacket);
+//				} else {
+				// System.out.println("----- PACKET LOSS ------");
 //					try {
 //						Thread.sleep(2000);
 //					} catch (InterruptedException e) {
 //						// TODO Auto-generated catch block
 //						e.printStackTrace();
 //					}
-				}
+//				}
 			}
 		} catch (IOException e) {
 			System.out.println("Reader closed");

@@ -56,9 +56,8 @@ public class ListManager implements PacketManager {
 		byte status = Protocol.ACK;
 		int seqNo = (new Random()).nextInt(Integer.MAX_VALUE);
 		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
-		int checksum = 0;
-		int windowSize = payloadSize;
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int offset = payloadSize;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {

@@ -3,7 +3,6 @@ package otherCommands;
 import java.io.File;
 
 import communicationProtocols.Protocol;
-import download.DownloadEstablished;
 import download.DownloadManager;
 import header.HeaderConstructor;
 import header.HeaderParser;
@@ -58,7 +57,7 @@ public class RemoveManager implements PacketManager {
 	private void setUpDownloadAfterRemove(String path, byte[] data) {
 		DownloadManager download = new DownloadManager(session, path);
 		session.setManager(download);
-		download.setManagerState(new DownloadEstablished(download, HeaderParser.getSequenceNumber(data)));
+//		download.setManagerState(new DownloadEstablished(download));
 //		download.processIncomingData(data);
 	}
 
@@ -85,10 +84,9 @@ public class RemoveManager implements PacketManager {
 		int seqNo = 0;// (new Random()).nextInt(Integer.MAX_VALUE);
 //		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
-		int checksum = 0;
-		int windowSize = 1;
+		int offset = 0;
 //		System.out.println("The payload size is: " + windowSize);
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, 0);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {

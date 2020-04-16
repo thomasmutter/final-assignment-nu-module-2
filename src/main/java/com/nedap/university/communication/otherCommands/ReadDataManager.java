@@ -19,7 +19,6 @@ public class ReadDataManager implements PacketManager {
 	@Override
 	public void processIncomingData(byte[] data) {
 		if (HeaderParser.getCommand(data) == Protocol.RP) {
-			System.out.println(getDataAsString(data).length());
 			UploadManager upload = new UploadManager(session,
 					"src/main/java/com/nedap/university/resources/" + getDataAsString(data));
 			session.setManager(upload);
@@ -57,9 +56,8 @@ public class ReadDataManager implements PacketManager {
 		int seqNo = HeaderParser.getAcknowledgementNumber(oldHeader) + 1;
 //		System.out.println("Sending packet with seqNo: " + seqNo);
 		int ackNo = HeaderParser.getSequenceNumber(oldHeader);
-		int checksum = 0;
-		int windowSize = 0;
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int offset = 0;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
 	}
 
 	private void shutdownSession(int seqNo, int ackNo) {

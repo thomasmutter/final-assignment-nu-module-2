@@ -9,21 +9,23 @@ public class DownloadEstablished implements ManagerState {
 	private DownloadManager manager;
 	private DownloadWindow algorithm;
 
-	public DownloadEstablished(DownloadManager managerArg, int offset) {
+	public DownloadEstablished(DownloadManager managerArg) {
 		manager = managerArg;
-		algorithm = new DownloadWindow(offset);
+		algorithm = new DownloadWindow();
 	}
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		int seqNo = HeaderParser.getSequenceNumber(incomingDatagram);
 		int ackNo = HeaderParser.getAcknowledgementNumber(incomingDatagram);
+
 		if (HeaderParser.getStatus(incomingDatagram) == Protocol.P) {
 			nextState(incomingDatagram);
 		} else if (!containsFin(incomingDatagram)) {
-			int payload = HeaderParser.getWindowSize(incomingDatagram);
+			int offset = HeaderParser.getOffset(incomingDatagram);
+			int payload = incomingDatagram.length - Protocol.HEADERLENGTH;
 			byte[] data = HeaderParser.getData(incomingDatagram);
-			actAccordingToWindow(seqNo, ackNo, payload, data);
+			actAccordingToWindow(offset, ackNo, payload, data);
 		} else {
 			manager.shutdownSession(ackNo, seqNo);
 		}
@@ -40,13 +42,13 @@ public class DownloadEstablished implements ManagerState {
 	}
 
 	private byte[] composeNewAck(int incomingAck) {
-		return manager.formHeader(Protocol.ACK, incomingAck + Protocol.ACKSIZE, algorithm.getAckNo(), 1);
+		return manager.formHeader(Protocol.ACK, incomingAck + Protocol.ACKSIZE, algorithm.getLastByteReceived(), 1);
 	}
 
-	private void actAccordingToWindow(int seqNo, int ackNo, int payload, byte[] data) {
-		if (algorithm.datagramInWindow(seqNo, payload)) {
-			algorithm.moveDatagramWindow(seqNo);
-			manager.writeToByteArray(data);
+	private void actAccordingToWindow(int offset, int ackNo, int payload, byte[] data) {
+		if (algorithm.datagramInWindow(offset, payload)) {
+			algorithm.moveDatagramWindow(offset);
+			manager.writeToByteArray(data, offset, payload);
 			manager.processOutgoingData(composeNewAck(ackNo));
 		} else {
 			// System.out.println("The sequence number is: " + seqNo);

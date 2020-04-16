@@ -45,9 +45,7 @@ public class CleanUpManager implements PacketManager {
 		byte status = statusArg;
 		int seqNo = seqNoArg + Protocol.ACKSIZE;
 		int ackNo = ackNoArg;
-		int checksum = 0;
-		int windowSize = 1;
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, Protocol.ACKSIZE);
 	}
 
 	public void setTerminator(Terminator terminatorArg) {

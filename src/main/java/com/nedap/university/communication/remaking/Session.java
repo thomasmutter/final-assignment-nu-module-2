@@ -79,7 +79,7 @@ public class Session {
 		return sender.getMetrics();
 	}
 
-	private byte[] stripBufferRemainder(DatagramPacket datagram) {
+	public static byte[] stripBufferRemainder(DatagramPacket datagram) {
 		byte[] buffer = datagram.getData();
 		byte[] data = new byte[datagram.getLength()];
 		for (int i = 0; i < data.length; i++) {

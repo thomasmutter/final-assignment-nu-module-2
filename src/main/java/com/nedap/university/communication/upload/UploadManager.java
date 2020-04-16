@@ -17,10 +17,13 @@ public class UploadManager implements PacketManager {
 	private ManagerState state;
 
 	private byte[] fileAsBytes;
+	private int fileSize;
 
 	public UploadManager(Session sessionArg, String pathArg) {
+		fileSize = fetchFileFromDisk(pathArg);
 		session = sessionArg;
-		state = new UploadInitialize(this, pathArg);
+		state = new UploadInitialize(this);
+
 	}
 
 	@Override
@@ -35,17 +38,19 @@ public class UploadManager implements PacketManager {
 		session.addToSendQueue(datagram);
 	}
 
-	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int payloadSize) {
+	public byte[] formHeader(byte statusArg, int seqNo, int ackNo, int offsetArg) {
 		byte flags = Protocol.UL;
 		byte status = statusArg;
-
-		int checksum = 0;
-		int windowSize = payloadSize;
-		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, windowSize, checksum);
+		int offset = offsetArg;
+		return HeaderConstructor.constructHeader(flags, status, seqNo, ackNo, offset);
 	}
 
 	public void setManagerState(ManagerState stateArg) {
 		state = stateArg;
+	}
+
+	public int getFileSize() {
+		return fileSize;
 	}
 
 	public int fetchFileFromDisk(String path) {

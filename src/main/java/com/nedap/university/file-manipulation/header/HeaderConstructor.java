@@ -5,7 +5,7 @@ import communicationProtocols.Protocol;
 public class HeaderConstructor {
 
 	public static byte[] constructHeader(byte flags, byte status, int sequenceNumber, int acknowledgementNumber,
-			int windowSize, int checksum) {
+			int offset) {
 		byte[] header = new byte[Protocol.HEADERLENGTH];
 
 		// Command flags - 1 byte
@@ -22,13 +22,9 @@ public class HeaderConstructor {
 		int[] acknowledgementNumberAsBytes = getBytesFromInt(acknowledgementNumber, Protocol.NUMBERBYTES);
 		header = addToHeader(header, acknowledgementNumberAsBytes, 6);
 
-		// Window Size - 2 bytes
-		int[] windowSizeAsBytes = getBytesFromInt(windowSize, 2);
-		header = addToHeader(header, windowSizeAsBytes, 10);
-
-		// Window Size - 2 bytes
-		int[] checksumAsBytes = getBytesFromInt(checksum, 2);
-		header = addToHeader(header, checksumAsBytes, 12);
+		// Offset
+		int[] offsetAsBytes = getBytesFromInt(offset, Protocol.NUMBERBYTES);
+		header = addToHeader(header, offsetAsBytes, 10);
 
 		return header;
 	}

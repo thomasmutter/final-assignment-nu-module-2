@@ -19,7 +19,7 @@ public class Server implements Runnable {
 	private void handleRequest(DatagramPacket request) throws IOException {
 		Session session = new Session();
 		RequestHandler handler = new RequestHandler();
-		session.setManager(handler.getPacketManagerFromRequest(request.getData(), session));
+		session.setManager(handler.getPacketManagerFromRequest(request, session));
 		session.setUpContact(request.getAddress(), request.getPort());
 		session.giveDatagramToManager(request);
 	}

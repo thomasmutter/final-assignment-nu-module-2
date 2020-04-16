@@ -9,9 +9,9 @@ public class UploadWindow {
 
 	private static final int WINDOWSIZE = 1;
 
-	public UploadWindow(int ackOffsetArg) {
-		ackOffset = ackOffsetArg;
-		nextSeqExpected = 0;
+	public UploadWindow() {
+		ackOffset = 0;
+		nextSeqExpected = 1;
 	}
 
 	public void updateWindow(int receivedSeqNo, int receivedAckNo) {
@@ -22,8 +22,7 @@ public class UploadWindow {
 	public boolean isDataInWindow(int receivedSeqNo) {
 //		int ok = receivedSeqNo - ackOffset;
 //		System.out.println("Received seqNo - offset " + ok);
-		// System.out.println("next incoming sequence number expected: " +
-		// nextSeqExpected);
+//		System.out.println("next incoming sequence number expected: " + nextSeqExpected);
 		return receivedSeqNo - ackOffset == nextSeqExpected;
 	}
 

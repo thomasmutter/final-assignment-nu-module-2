@@ -22,22 +22,17 @@ public class HeaderParser {
 		return data;
 	}
 
-	public static byte[] trimEmptyData(byte[] datagram) {
-		byte[] data = new byte[Protocol.HEADERLENGTH + getWindowSize(datagram)];
-		for (int i = 0; i < data.length; i++) {
-			data[i] = datagram[i];
-		}
-		return data;
-	}
+//	public static byte[] trimEmptyData(byte[] datagram) {
+//		byte[] data = new byte[Protocol.HEADERLENGTH + getWindowSize(datagram)];
+//		for (int i = 0; i < data.length; i++) {
+//			data[i] = datagram[i];
+//		}
+//		return data;
+//	}
 
-	public static int getChecksum(byte[] header) {
-		int[] checksumBytes = getBytes(header, 12, 2);
-		return getIntFromByteArray(checksumBytes);
-	}
-
-	public static int getWindowSize(byte[] header) {
-		int[] windowBytes = getBytes(header, 10, 2);
-		return getIntFromByteArray(windowBytes);
+	public static int getOffset(byte[] header) {
+		int[] offsetBytes = getBytes(header, 10, 4);
+		return getIntFromByteArray(offsetBytes);
 	}
 
 	public static int getSequenceNumber(byte[] header) {

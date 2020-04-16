@@ -92,8 +92,7 @@ public class Client {
 
 		InputInterpreter input = new InputInterpreter(command, this);
 		addSessionToMap(command, session);
-		byte[] inputDatagram = input.getDatagramFromInput();
-		session.setManager(input.getPacketManagerFromInput(session));
+		byte[] inputDatagram = input.setUpSession(session);
 		System.out.println("Address: " + serverAddress);
 		session.setUpContact(serverAddress, Protocol.PORT);
 		session.addToSendQueue(inputDatagram);

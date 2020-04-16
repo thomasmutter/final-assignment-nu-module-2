@@ -7,19 +7,18 @@ import managerStates.ManagerState;
 public class UploadEstablished implements ManagerState {
 
 	private UploadManager manager;
-	private int fileLength;
 	private int filePointer;
 	private UploadWindow window;
 
-	public UploadEstablished(UploadManager managerArg, int fileLengthArg, UploadWindow windowArg) {
+	public UploadEstablished(UploadManager managerArg, UploadWindow windowArg) {
 		manager = managerArg;
-		fileLength = fileLengthArg;
 		window = windowArg;
 	}
 
 	@Override
 	public void translateIncomingHeader(byte[] incomingDatagram) {
 		if (HeaderParser.getStatus(incomingDatagram) == Protocol.P) {
+			System.out.println("Pause initiated");
 			nextState(incomingDatagram);
 			return;
 		}
@@ -28,8 +27,9 @@ public class UploadEstablished implements ManagerState {
 		int ackNo = HeaderParser.getAcknowledgementNumber(incomingDatagram);
 
 //		System.out.println("The filepointer is at: " + filePointer);
+//		System.out.println("The file size is: " + manager.getFileSize());
 
-		if (ackNo != fileLength) {
+		if (ackNo != manager.getFileSize()) {
 			sendOrDiscardDatagram(seqNo, ackNo);
 		} else {
 			manager.shutdownSession(ackNo, seqNo);
@@ -54,12 +54,12 @@ public class UploadEstablished implements ManagerState {
 		int seqNo = oldSeqNo + payloadSize;
 		byte[] dataToSend = manager.getSegmentFromFile(payloadSize, filePointer);
 		filePointer += payloadSize;
-		byte[] headerToSend = manager.formHeader(Protocol.ACK, seqNo, ackToSend, payloadSize);
+		byte[] headerToSend = manager.formHeader(Protocol.ACK, seqNo, ackToSend, filePointer);
 		manager.processOutgoingData(headerToSend, dataToSend);
 	}
 
 	private int computePayloadSize() {
-		int payloadSize = Math.min(Protocol.PACKETSIZE - Protocol.HEADERLENGTH, fileLength - filePointer);
+		int payloadSize = Math.min(Protocol.PACKETSIZE - Protocol.HEADERLENGTH, manager.getFileSize() - filePointer);
 		return payloadSize;
 	}
 
